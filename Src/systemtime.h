@@ -29,6 +29,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#define CONTINUE 0
+#define FINISH 1
+
 int systemFinished;
 
 void *system_clock( void *n );

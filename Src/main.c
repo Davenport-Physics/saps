@@ -60,17 +60,18 @@ int main(int argc, char **argv)
 	scanf("%d", &numProton);
 	
 	pthread_create(&secondary, NULL, constructor, (void *)0);
-	
 	engine_init();
 	
+	systemFinished = CONTINUE;
 	pthread_create( &event, NULL, engine_event, ( void *)0);
-	
 	engine_run(&readyElectron, &readyProton);
 	
 	
-	systemFinished = 1;
 	pthread_join(secondary, NULL);
+	pthread_join(event, NULL);
 	
+	engine_quit(); 
+	exit(EXIT_SUCCESS);
 	return 0;
 }
 void *constructor(void *n) {
@@ -100,7 +101,7 @@ void *constructor(void *n) {
 	constants = ( struct data * )malloc( sizeof(struct data) );
 	
 	//Finished is the variable each thread look at to keep them running.
-	systemFinished = 0;
+	systemFinished = FINISH;
 	numParticles[0].amountElectron = numElectron;
 	numParticles[0].amountProton = numProton;
 	numParticles[0].amountNeutron = numNeutron;

@@ -32,9 +32,6 @@
 #include "particles.h"
 #include "systemtime.h"
 
-#define ENGINE_FINISH 0
-#define ENGINE_CONTINUE 1
-
 int engine_init();
 void engine_run(int *readyElectron, int *readyProton);
 void engine_quit();

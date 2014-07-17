@@ -35,8 +35,8 @@ int engine_init() {
 			"Physics", 
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			640,
-			480,
+			1280,
+			720,
 			SDL_WINDOW_OPENGL);
 
 	return 0;
@@ -46,10 +46,14 @@ void engine_run(int *readyElectron, int *readyProton) {
 	
 	int x;
 	
+	struct timespec *hold = ( struct timespec *)malloc( sizeof ( struct timespec ) );
+	hold[0].tv_sec = 0;
+	hold[0].tv_nsec = 1666666;
+	
+	SDL_GLContext glcontext = SDL_GL_CreateContext(Window);
+	
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	
 	glMatrixMode(GL_MODELVIEW);
-	
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
 	
@@ -77,7 +81,11 @@ void engine_run(int *readyElectron, int *readyProton) {
 			glPopMatrix();
 	
 		}
+		SDL_GL_SwapWindow(Window);
+		nanosleep( hold , NULL );
+		
 	}
+	SDL_GL_DeleteContext(glcontext);
 	
 }
  void drawSphere(double r, int lats, int longs) {
@@ -124,11 +132,11 @@ void engine_quit() {
 
 void *engine_event(void *n) {
 	
-	int x = ENGINE_CONTINUE;
+	int x = systemFinished;
 	
 	SDL_Event event;
 	
-	while ( x == ENGINE_CONTINUE ) {
+	while ( x == CONTINUE ) {
 		
 		while ( SDL_PollEvent( &event ) ) {
 			
@@ -136,20 +144,18 @@ void *engine_event(void *n) {
 			
 				if (event.key.keysym.sym == 'q') {
 				
-					x = ENGINE_FINISH;
+					x = FINISH;
 					
 				}
 				
 			} else if (event.type == SDL_QUIT) {
 				
-				x = ENGINE_FINISH;
+				x = FINISH;
 				
 			}
 			
 		}
 		
 	}
-	engine_quit(); 
-	exit(EXIT_SUCCESS);
 	pthread_exit(EXIT_SUCCESS);
 }
