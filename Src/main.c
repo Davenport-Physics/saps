@@ -62,13 +62,12 @@ int main(int argc, char **argv)
 	pthread_create(&secondary, NULL, constructor, (void *)0);
 	engine_init();
 	
-	systemFinished = CONTINUE;
 	pthread_create( &event, NULL, engine_event, ( void *)0);
 	engine_run(&readyElectron, &readyProton);
 	
-	
-	pthread_join(secondary, NULL);
 	pthread_join(event, NULL);
+	pthread_join(secondary, NULL);
+
 	
 	engine_quit(); 
 	exit(EXIT_SUCCESS);
@@ -101,7 +100,7 @@ void *constructor(void *n) {
 	constants = ( struct data * )malloc( sizeof(struct data) );
 	
 	//Finished is the variable each thread look at to keep them running.
-	systemFinished = FINISH;
+	systemFinished = CONTINUE;
 	numParticles[0].amountElectron = numElectron;
 	numParticles[0].amountProton = numProton;
 	numParticles[0].amountNeutron = numNeutron;

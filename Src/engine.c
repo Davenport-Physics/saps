@@ -23,7 +23,9 @@
 
 #include "engine.h"
 
- void drawSphere(double r, int lats, int longs);
+void drawCircle(float radius, float triangles);
+void drawSphere(double r, int lats, int longs);
+
 
 SDL_Window* Window;
 
@@ -35,8 +37,8 @@ int engine_init() {
 			"Physics", 
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			1280,
-			720,
+			800,
+			800,
 			SDL_WINDOW_OPENGL);
 
 	return 0;
@@ -54,18 +56,19 @@ void engine_run(int *readyElectron, int *readyProton) {
 	
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glLoadIdentity();
 	
 	while (systemFinished == 0) {
+		
+		glClear(GL_COLOR_BUFFER_BIT);
+		glLoadIdentity();
 		
 		for (x = 0;x < *readyElectron; x++) {
 		
 			glPushMatrix();
-	
+			
 				glColor3f( 0.0f,0.0f,0.0f );
 				glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
-				drawSphere( (1 + electronLocations[x].z)/33.33, 10, 10 );
+				drawCircle( (1 + electronLocations[x].z)/33.33, 30);
 	
 			glPopMatrix();
 	
@@ -76,7 +79,7 @@ void engine_run(int *readyElectron, int *readyProton) {
 		
 				glColor3f( 0.0f,0.0f,1.0f );
 				glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-				drawSphere( (1 + protonLocations[x].z)/33.33, 20, 20 );
+				drawCircle( (1 + protonLocations[x].z)/33.33, 30);
 		
 			glPopMatrix();
 	
@@ -86,6 +89,27 @@ void engine_run(int *readyElectron, int *readyProton) {
 		
 	}
 	SDL_GL_DeleteContext(glcontext);
+	
+}
+void drawCircle(float radius, float triangles) {
+	
+	float degrees = ( 360 / triangles);
+	float current = 0;
+	
+	int x;
+	
+	glBegin(GL_TRIANGLES);
+
+		for ( x = 0; x < (int)triangles; x++) {
+			
+			glVertex3f(radius*cos(current*(M_PI/180)), radius*sin(current*(M_PI/180)) , 0.0f );
+			current += degrees;
+			glVertex3f(radius*cos(current*(M_PI/180)), radius*sin(current*(M_PI/180)) , 0.0f );
+			glVertex3f(0.0f, 0.0f, 0.0f);
+		
+		}
+	
+	glEnd();
 	
 }
  void drawSphere(double r, int lats, int longs) {
@@ -132,11 +156,9 @@ void engine_quit() {
 
 void *engine_event(void *n) {
 	
-	int x = systemFinished;
-	
 	SDL_Event event;
 	
-	while ( x == CONTINUE ) {
+	while ( systemFinished == CONTINUE ) {
 		
 		while ( SDL_PollEvent( &event ) ) {
 			
@@ -144,13 +166,13 @@ void *engine_event(void *n) {
 			
 				if (event.key.keysym.sym == 'q') {
 				
-					x = FINISH;
+					systemFinished = FINISH;
 					
 				}
 				
 			} else if (event.type == SDL_QUIT) {
 				
-				x = FINISH;
+				systemFinished = FINISH;
 				
 			}
 			

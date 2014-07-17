@@ -28,6 +28,7 @@
 #include "GL/gl.h"
 
 #include <pthread.h>
+#include <math.h>
 
 #include "particles.h"
 #include "systemtime.h"
