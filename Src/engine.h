@@ -26,15 +26,17 @@
 
 #include "SDL2/SDL.h"
 #include "GL/gl.h"
-#include "pthread.h"
+
+#include <pthread.h>
 
 #include "particles.h"
+#include "systemtime.h"
 
 #define ENGINE_FINISH 0
 #define ENGINE_CONTINUE 1
 
 int engine_init();
-void engine_run();
+void engine_run(int *readyElectron, int *readyProton);
 void engine_quit();
 
 void *engine_event(void *n);

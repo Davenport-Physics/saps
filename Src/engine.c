@@ -42,7 +42,7 @@ int engine_init() {
 	return 0;
 
 }
-void engine_run() {
+void engine_run(int *readyElectron, int *readyProton) {
 	
 	int x;
 	
@@ -53,27 +53,30 @@ void engine_run() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
 	
-	for (x = 0;x < readyElectron; x++) {
+	while (systemFinished == 0) {
 		
-		glPushMatrix();
-	
-			glColor3f( 0.0f,0.0f,0.0f );
-			glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
-			drawSphere( (1 + electronLocations[x].z)/33.33, 10, 10 );
-	
-		glPopMatrix();
-	
-	}
-	for (x = 0;x < readyProton; x++) {
+		for (x = 0;x < *readyElectron; x++) {
 		
-		glPushMatrix();
-		
-			glColor3f( 0.0f,0.0f,1.0f );
-			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-			drawSphere( (1 + protonLocations[x].z)/33.33, 20, 20 );
-		
-		glPopMatrix();
+			glPushMatrix();
 	
+				glColor3f( 0.0f,0.0f,0.0f );
+				glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
+				drawSphere( (1 + electronLocations[x].z)/33.33, 10, 10 );
+	
+			glPopMatrix();
+	
+		}
+		for (x = 0;x < *readyProton; x++) {
+		
+			glPushMatrix();
+		
+				glColor3f( 0.0f,0.0f,1.0f );
+				glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
+				drawSphere( (1 + protonLocations[x].z)/33.33, 20, 20 );
+		
+			glPopMatrix();
+	
+		}
 	}
 	
 }

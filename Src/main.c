@@ -31,6 +31,7 @@
 
 #include "particles.h"
 #include "constants.h"
+#include "engine.h"
 #include "systemtime.h"
 
 void set_mode();
@@ -40,12 +41,16 @@ void display(void);
 
 void *constructor(void *n);
 
+int numElectron = 0, numProton = 0, numNeutron = 0;
+int readyElectron = 0, readyProton = 0;
+
 const float fps = 1000/60;
 
 int main(int argc, char **argv)
 {
 	
 	pthread_t secondary;
+	pthread_t event;
 	
 	srand(time(NULL));
 	
@@ -55,13 +60,15 @@ int main(int argc, char **argv)
 	printf("Number of protons: ");
 	scanf("%d", &numProton);
 	
-	/*printf("Neutrons have not be implemented yet");
-	printf("\nNumber of neutrons: ");
-	scanf("%d", &numNeutron);*/
-	
 	pthread_create(&secondary, NULL, constructor, (void *)0);
 	
-	glutInit( &argc, argv );
+	engine_init();
+	
+	pthread_create( &event, NULL, engine_event, ( void *)0);
+	
+	engine_run(&readyElectron, &readyProton);
+	
+	/*glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA );
 	glutInitWindowSize(1024, 768);
 	glutCreateWindow("Physics");
@@ -72,7 +79,7 @@ int main(int argc, char **argv)
 	//60 fps at it's best.
 	set_mode();
 	glutTimerFunc( fps, runloop, 0 );
-	glutMainLoop();
+	glutMainLoop();*/
 	
 	systemFinished = 1;
 	

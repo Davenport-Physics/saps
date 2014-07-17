@@ -48,9 +48,6 @@ struct amount {
 	
 };
 
-int numElectron = 0, numProton = 0, numNeutron = 0;
-int readyElectron = 0, readyProton = 0;
-
 struct location *electronLocations;
 struct location *protonLocations;
 struct location *neutronLocations;
