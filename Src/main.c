@@ -27,7 +27,6 @@
 #include <time.h>
 
 #include <pthread.h>
-#include <GL/glut.h>
 
 #include "particles.h"
 #include "constants.h"
@@ -68,97 +67,12 @@ int main(int argc, char **argv)
 	
 	engine_run(&readyElectron, &readyProton);
 	
-	/*glutInit( &argc, argv );
-	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA );
-	glutInitWindowSize(1024, 768);
-	glutCreateWindow("Physics");
-	
-	glutKeyboardFunc( &keyboard );
-	glutDisplayFunc( &display );
-	
-	//60 fps at it's best.
-	set_mode();
-	glutTimerFunc( fps, runloop, 0 );
-	glutMainLoop();*/
 	
 	systemFinished = 1;
-	
 	pthread_join(secondary, NULL);
 	
 	return 0;
 }
-
-void set_mode() {
-	
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	
-	glMatrixMode(GL_MODELVIEW);
-
-}
-
-void runloop(int x) {
-	
-	display();
-	
-	glutTimerFunc( fps , runloop, x);
-	
-}
-
-void display( void ) {
-	
-	int x;
-	
-	glClear(GL_COLOR_BUFFER_BIT);
-	glLoadIdentity();
-	
-	for (x = 0;x < readyElectron; x++) {
-		
-		glPushMatrix();
-	
-			glColor3f( 0.0f,0.0f,0.0f );
-			glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
-			glutWireSphere( (1 + electronLocations[x].z)/33.33, 10, 10 );
-	
-		glPopMatrix();
-	
-	}
-	for (x = 0;x < readyProton; x++) {
-		
-		glPushMatrix();
-		
-			glColor3f( 0.0f,0.0f,1.0f );
-			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-			glutSolidSphere( (1 + protonLocations[x].z)/33.33, 20, 20 );
-		
-		glPopMatrix();
-	
-	}	
-	
-	glutSwapBuffers();
-	
-}
-
-void keyboard(unsigned char key, int x, int y) {
-	
-	switch (key) {
-		
-		case 'q':
-		
-			exit(EXIT_SUCCESS);
-		
-		break;
-		default:
-		
-			printf("Key not set\n");
-			
-		break;
-		
-	
-	}
-	
-
-}
-
 void *constructor(void *n) {
 	
 	int x;
