@@ -33,11 +33,6 @@
 #include "engine.h"
 #include "systemtime.h"
 
-void set_mode();
-void runloop(int x);
-void keyboard(unsigned char key, int x, int y);
-void display(void);
-
 void *constructor(void *n);
 
 int numElectron = 0, numProton = 0, numNeutron = 0;
