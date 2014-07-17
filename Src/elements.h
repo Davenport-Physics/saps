@@ -1,7 +1,7 @@
 /*
  * elements.c
  * 
- * Copyright 2013 Michael Davenport <mike3214545@gmail.com>
+ * Copyright 2013 Michael Davenport <Davenport.physics@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,9 @@
 #ifndef ELEMENTS_H
 #define	ELEMENTS_H
 
+#include <malloc.h>
+
+struct attributes *hydrogen;
 struct attributes {
 	
 	int numElectrons, numProtons, numNeutron;
@@ -32,6 +35,7 @@ struct attributes {
 	
 };
 
+void initialize_elements(int , int);
 
 #endif
 

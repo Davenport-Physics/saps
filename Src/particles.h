@@ -1,7 +1,7 @@
 /*
  * particles.c
  * 
- * Copyright 2013 Michael Davenport <mike3214545@gmail.com>
+ * Copyright 2013 Michael Davenport <Davenport.physics@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,9 @@ struct amount {
 	int amountElectron, amountProton, amountNeutron;
 	
 };
+
+int numElectron = 0, numProton = 0, numNeutron = 0;
+int readyElectron = 0, readyProton = 0;
 
 struct location *electronLocations;
 struct location *protonLocations;

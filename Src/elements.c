@@ -1,7 +1,7 @@
 /*
  * elements.c
  * 
- * Copyright 2013 Michael Davenport <mike3214545@gmail.com>
+ * Copyright 2013 Michael Davenport <Davenport.physics@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,3 +24,32 @@
 
 #include "elements.h"
 
+#define HYDROGEN 0
+#define HELIUM 1
+
+void initialize_elements(int element, int num) {
+	
+	int x;
+	switch ( element ) {
+		
+		case HYDROGEN: hydrogen = ( struct attributes *)malloc( num * sizeof( struct attributes ) ); break;
+	
+	}
+	
+	switch ( element ) {
+	
+		case HYDROGEN:
+		
+			for ( x = 0; x < num;x++ ) {
+			
+				hydrogen[x].numElectrons = 1;
+				hydrogen[x].numProtons = 1;
+				hydrogen[x].numNeutron = 0;
+				
+			}
+		break;
+		
+	}
+	
+	
+}

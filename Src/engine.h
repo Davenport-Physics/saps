@@ -1,7 +1,7 @@
 /*
- * systemtime.h
+ * engine.h
  * 
- * Copyright 2013 Michael Davenport <Davenport.physics@gmail.com>
+ * Copyright 2014 Michael Davenport <Davenport.physics@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,18 +21,24 @@
  * 
  */
 
+#ifndef ENGINE_H
+#define ENGINE_H
 
-#ifndef	SYSTEMTIME_H
-#define	SYSTEMTIME_H
+#include "SDL2/SDL.h"
+#include "GL/gl.h"
+#include "pthread.h"
 
-#include <time.h>
-#include <stdlib.h>
-#include <pthread.h>
+#include "particles.h"
 
-int systemFinished;
+#define ENGINE_FINISH 0
+#define ENGINE_CONTINUE 1
 
-void *system_clock( void *n );
-long double get_system_time();
+int engine_init();
+void engine_run();
+void engine_quit();
+
+void *engine_event(void *n);
 
 #endif
+
 
