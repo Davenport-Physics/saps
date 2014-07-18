@@ -24,3 +24,21 @@
 
 #include "mechanics.h"
 
+float new_position(float currentPosition , float expectedDisplacement , float radius ) {
+	
+	if ( (currentPosition + expectedDisplacement) >= 1 ) {
+		
+		return 1 - radius;
+		
+	} else if ( (currentPosition + expectedDisplacement) <= -1 ) {
+		
+		return -1 + radius;
+	
+	} else {
+	
+		return expectedDisplacement;
+	
+	}
+	
+}
+

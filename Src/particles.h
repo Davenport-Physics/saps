@@ -35,10 +35,12 @@
 #include "systemtime.h"
 #include "electric.h"
 #include "newtonian.h"
+#include "mechanics.h"
 
 struct location {
 	
 	float x, y, z;
+	float radius;
 	int done;
 	
 };

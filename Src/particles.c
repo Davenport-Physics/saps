@@ -33,6 +33,10 @@
 #define PR_PR 2
 #define PR_EL 3
 
+#define FORCE 0
+#define ACCELERATION 1
+#define VELOCITY 2
+
 struct particle {
 	
 	long double mass, charge;
@@ -53,19 +57,6 @@ struct particle {
  * 3 - Proton/Electron
  * 
  * */
-struct movement {
-	
-	int type;
-	
-	long double velocity , velocityX , velocityY , velocityZ;
-	long double initialVelocityX , initialVelocityY , initialVelocityZ;
-	long double acceleration , accelerationX , accelerationY , accelerationZ;
-	long double force , forceX , forceY , forceZ;
-	long double displacementX , displacementY , displacementZ;
-
-};
-
-
 
 struct particle electronAttributes;
 struct particle protonAttributes;
@@ -124,7 +115,7 @@ void *electron( void *loc ) {
 		}
 		
 	}
-	
+	electronLocations[*index].radius = (1 + electronLocations[*index].z) / 33.33;
 	electronLocations[*index].done = 1;
 	check_system();
 	
@@ -142,7 +133,7 @@ void *electron( void *loc ) {
 	 * */
 	while ( systemFinished == 0 ) {
 	
-		current.type = 0;
+		current.type = EL_EL;
 		
 		for ( x = 0;x < numParticles[0].amountElectron;x++ ) {
 		
@@ -161,7 +152,7 @@ void *electron( void *loc ) {
 		
 		}
 		
-		current.type = 1;
+		current.type = EL_PR;
 		
 		for ( x = 0;x < numParticles[0].amountProton;x++ ) {
 			
@@ -173,10 +164,51 @@ void *electron( void *loc ) {
 		
 		}
 		
-		electronLocations[*index].x += current.displacementX;
-		electronLocations[*index].y += current.displacementY;
-		electronLocations[*index].z += current.displacementZ;
+		/* 
+		 * This code checks to see whether the particles have escaped
+		 * outside of the boundary or are on the verge of doing so. In
+		 * the case that they are, the code will set them as close to
+		 * the boundary as possible, using the radius of the particle as
+		 * a reference distance.
+		 * 
+		 * {@ 
+		 * */
+		float temp = new_position(electronLocations[*index].x , current.displacementX , electronLocations[*index].radius);
+		if ( current.displacementX != temp ) {
+			
+			electronLocations[*index].x = temp;
 		
+		} else {
+		
+			electronLocations[*index].x += current.displacementX;
+		
+		}
+		
+		temp = new_position(electronLocations[*index].y , current.displacementY , electronLocations[*index].radius);
+		if ( current.displacementY !=  temp ) {
+		
+			electronLocations[*index].y = temp;
+			
+		} else {
+		
+			electronLocations[*index].y += current.displacementY;
+			
+		}
+		
+		temp = new_position(electronLocations[*index].z , current.displacementZ , electronLocations[*index].radius);
+		if ( current.displacementZ != temp ) {
+		
+			electronLocations[*index].z = temp;
+			
+		} else {
+		
+			electronLocations[*index].z += current.displacementZ;
+		
+		}
+		/* @} */
+	
+		electronLocations[*index].radius = (1 + electronLocations[*index].z) / 33.33;
+	
 		initialTime = time;
 		time += get_system_time();
 		nanosleep( hold, NULL );
@@ -237,6 +269,7 @@ void *proton( void *loc ) {
 			
 	}
 	
+	protonLocations[*index].radius = ( 1 + protonLocations[*index].z ) / 22.22;
 	protonLocations[*index].done = 1;
 	check_system();
 	
@@ -246,7 +279,7 @@ void *proton( void *loc ) {
 	
 	while ( systemFinished == 0 ) {
 		
-		current.type = 3;
+		current.type = PR_EL;
 		
 		for ( x = 0;x < numParticles[0].amountElectron;x++ ) {
 			
@@ -257,7 +290,7 @@ void *proton( void *loc ) {
 			
 		
 		}
-		current.type = 2;
+		current.type = PR_PR;
 		
 		for ( x = 0;x < numParticles[0].amountProton;x++ ) {
 			
@@ -276,9 +309,41 @@ void *proton( void *loc ) {
 			
 		}
 		
-		protonLocations[*index].x += current.displacementX;
-		protonLocations[*index].y += current.displacementY;
-		protonLocations[*index].z += current.displacementZ;
+		float temp = new_position(protonLocations[*index].x , current.displacementX , protonLocations[*index].radius);
+		if ( current.displacementX != temp ) {
+			
+			protonLocations[*index].x = temp;
+		
+		} else {
+		
+			protonLocations[*index].x += current.displacementX;
+		
+		}
+		
+		temp = new_position(protonLocations[*index].y , current.displacementY , protonLocations[*index].radius);
+		if ( current.displacementY !=  temp ) {
+		
+			protonLocations[*index].y = temp;
+			
+		} else {
+		
+			protonLocations[*index].y += current.displacementY;
+			
+		}
+		
+		temp = new_position(protonLocations[*index].z , current.displacementZ , protonLocations[*index].radius);
+		if ( current.displacementZ != temp ) {
+		
+			protonLocations[*index].z = temp;
+			
+		} else {
+		
+			protonLocations[*index].z += current.displacementZ;
+		
+		}
+		
+		
+		protonLocations[*index].radius = ( 1 + protonLocations[*index].z ) / 22.22;
 		
 		initialTime = time;
 		time += get_system_time();
@@ -425,7 +490,7 @@ void calculate_velocity( int index1 , int index2 ,  long double time , struct mo
 	
 	this->velocity += velocity_accelerationTime( this->acceleration, time ) - this->velocity;
 	
-	calculate_components( x , y , z , this , 2);
+	calculate_components( x , y , z , this , VELOCITY);
 	
 }
 
@@ -629,7 +694,7 @@ void calculate_components( long double x , long double y , long double z , struc
 	
 	switch ( type ) {
 		
-		case 0: 
+		case FORCE: 
 		
 			this->forceX += ( this->force * cos( xytheta ) );
 			this->forceY += ( this->force * sin( xytheta ) );
@@ -637,7 +702,7 @@ void calculate_components( long double x , long double y , long double z , struc
 			 
 		break;
 		
-		case 1:
+		case ACCELERATION:
 		
 			this->accelerationX += ( this->acceleration * cos( xytheta ) );
 			this->accelerationY += ( this->acceleration * sin( xytheta ) );
@@ -645,7 +710,7 @@ void calculate_components( long double x , long double y , long double z , struc
 		
 		break;
 		
-		case 2:
+		case VELOCITY:
 		
 			this->velocityX += ( this->velocity * cos( xytheta ) );
 			this->velocityY += ( this->velocity * sin( xytheta ) );

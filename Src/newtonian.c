@@ -24,6 +24,12 @@
 
 #include "newtonian.h"
 
+long double momentum_massVelocity(long double M , long double V) {
+	
+	return M * V;
+	
+}
+
 long double velocity_accelerationTime( long double A , long double T) {
 	
 	return A * T;
@@ -59,6 +65,7 @@ long double velocity_metresTime( long double M , long double T ) {
 	return M / T;
 
 }
+
 long double time_velocityMetres( long double V , long double M ) {
 	
 	return V / M;

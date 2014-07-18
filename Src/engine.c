@@ -90,7 +90,7 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 			
 			glColor3f( 0.0f,0.0f,0.0f );
 			glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
-			drawCircle( (1 + electronLocations[x].z)/33.33, 30);
+			drawCircle( electronLocations[x].radius, 30);
 	
 		glPopMatrix();
 	
@@ -101,7 +101,7 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 		
 			glColor3f( 0.0f,0.0f,1.0f );
 			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-			drawCircle( (1 + protonLocations[x].z)/33.33, 30);
+			drawCircle( protonLocations[x].radius, 30);
 		
 		glPopMatrix();
 	

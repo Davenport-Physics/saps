@@ -111,7 +111,7 @@ void *constructor(void *n) {
 	int x;
 	
 	//stops for a tenth of a second.
-	struct timespec *hold = ( struct timespec * )malloc( sizeof(struct timespec) );
+	struct timespec *hold = ( struct timespec * )malloc( sizeof( struct timespec ) );
 	hold[0].tv_sec = 0;
 	hold[0].tv_nsec = 100000000;
 	

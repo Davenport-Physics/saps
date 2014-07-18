@@ -27,6 +27,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+struct movement {
+	
+	int type;
+	
+	long double velocity , velocityX , velocityY , velocityZ;
+	long double initialVelocityX , initialVelocityY , initialVelocityZ;
+	long double acceleration , accelerationX , accelerationY , accelerationZ;
+	long double force , forceX , forceY , forceZ;
+	long double displacementX , displacementY , displacementZ;
+
+};
+
+
+long double momentum_massVelocity( long double  , long double );
 long double velocity_accelerationTime( long double , long double );
 
 long double force_massAcceleration( long double ,long double );

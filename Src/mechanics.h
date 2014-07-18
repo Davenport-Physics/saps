@@ -25,6 +25,11 @@
 #ifndef MECHANICS_H
 #define MECHANICS_H
 
+#include <math.h>
 
+float new_position(float currentPosition , float expectedDisplacement , float radius );
+
+float boundary_xy();
+float boundary_yz();
 
 #endif
