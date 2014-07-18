@@ -33,8 +33,16 @@
 #include "particles.h"
 #include "systemtime.h"
 
+struct enginevars {
+	
+	int *readyElectron;
+	int *readyProton;
+	
+	
+};
+
 int engine_init();
-void engine_run(int *readyElectron, int *readyProton);
+void engine_run(struct enginevars *vars, int *types);
 void engine_quit();
 
 void *engine_event(void *n);

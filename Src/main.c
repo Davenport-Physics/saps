@@ -42,27 +42,65 @@ const float fps = 1000/60;
 
 int main(int argc, char **argv)
 {
+	srand(time(NULL));
+	
 	
 	pthread_t secondary;
 	pthread_t event;
 	
-	srand(time(NULL));
+	int types[3];	
+	char type[100] = {'\0'};
 	
-	printf("Number of electrons: ");
-	scanf("%d" , &numElectron);
+	struct enginevars var;
 	
-	printf("Number of protons: ");
-	scanf("%d", &numProton);
+	var.readyElectron = &readyElectron;
+	var.readyProton = &readyProton;
 	
-	pthread_create(&secondary, NULL, constructor, (void *)0);
-	engine_init();
+	while (1) {
+		
+		types[0] = 0;
+		types[1] = 0;
+		types[2] = 0;
 	
-	pthread_create( &event, NULL, engine_event, ( void *)0);
-	engine_run(&readyElectron, &readyProton);
+		printf("Type: ");
+		scanf("%s", type);
 	
-	pthread_join(event, NULL);
-	pthread_join(secondary, NULL);
-
+		if (strcmp( type , "particles" ) == 0) {
+			
+			types[0] = 1;
+		
+			printf("Number of electrons: ");
+			scanf("%d" , &numElectron);
+			printf("Number of protons: ");
+			scanf("%d", &numProton);
+	
+			engine_init();
+			pthread_create(&secondary, NULL, constructor, (void *)0);
+			pthread_create( &event, NULL, engine_event, ( void *)0);
+			engine_run( &var , types );
+	
+	
+			pthread_join(event, NULL);
+			pthread_join(secondary, NULL);
+			engine_quit();
+		
+		} else if ( strcmp( type , "ball" ) == 0 ) {
+		
+			//engine_run();
+	
+		} else if ( strcmp( type , "quit" ) == 0 ) {
+			
+			break;
+			
+		} else {
+			
+			printf("That is not a correct type of operation\n");
+			
+		}
+		
+	}
+	
+	
 	
 	engine_quit(); 
 	exit(EXIT_SUCCESS);
@@ -94,7 +132,7 @@ void *constructor(void *n) {
 	
 	constants = ( struct data * )malloc( sizeof(struct data) );
 	
-	//Finished is the variable each thread look at to keep them running.
+	//systemFinished is the variable each thread look at to keep them running.
 	systemFinished = CONTINUE;
 	numParticles[0].amountElectron = numElectron;
 	numParticles[0].amountProton = numProton;

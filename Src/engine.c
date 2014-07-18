@@ -23,6 +23,7 @@
 
 #include "engine.h"
 
+void drawParticles( int *readyElectron , int *readyProton );
 void drawCircle(float radius, float triangles);
 void drawSphere(double r, int lats, int longs);
 
@@ -44,7 +45,7 @@ int engine_init() {
 	return 0;
 
 }
-void engine_run(int *readyElectron, int *readyProton) {
+void engine_run(struct enginevars *vars, int *types) {
 	
 	int x;
 	
@@ -62,33 +63,49 @@ void engine_run(int *readyElectron, int *readyProton) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glLoadIdentity();
 		
-		for (x = 0;x < *readyElectron; x++) {
+		for ( x = 0; x < 3; x++ ) {
 		
-			glPushMatrix();
+			switch (types[x]) {
+				
+				case 1: drawParticles( vars->readyElectron , vars->readyProton ); break;
 			
-				glColor3f( 0.0f,0.0f,0.0f );
-				glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
-				drawCircle( (1 + electronLocations[x].z)/33.33, 30);
-	
-			glPopMatrix();
-	
+			}
+		
 		}
-		for (x = 0;x < *readyProton; x++) {
-		
-			glPushMatrix();
-		
-				glColor3f( 0.0f,0.0f,1.0f );
-				glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-				drawCircle( (1 + protonLocations[x].z)/33.33, 30);
-		
-			glPopMatrix();
 	
-		}
 		SDL_GL_SwapWindow(Window);
 		nanosleep( hold , NULL );
 		
 	}
 	SDL_GL_DeleteContext(glcontext);
+	
+}
+void drawParticles( int *readyElectron , int *readyProton ) {
+	
+	int x;
+	
+	for (x = 0;x < *readyElectron; x++) {
+		
+		glPushMatrix();
+			
+			glColor3f( 0.0f,0.0f,0.0f );
+			glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
+			drawCircle( (1 + electronLocations[x].z)/33.33, 30);
+	
+		glPopMatrix();
+	
+	}
+	for (x = 0;x < *readyProton; x++) {
+		
+		glPushMatrix();
+		
+			glColor3f( 0.0f,0.0f,1.0f );
+			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
+			drawCircle( (1 + protonLocations[x].z)/33.33, 30);
+		
+		glPopMatrix();
+	
+	}
 	
 }
 void drawCircle(float radius, float triangles) {
