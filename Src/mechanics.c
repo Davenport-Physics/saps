@@ -24,7 +24,7 @@
 
 #include "mechanics.h"
 
-float new_position(float currentPosition , float expectedDisplacement , float radius ) {
+long double new_position(long double currentPosition , long double expectedDisplacement , long double radius ) {
 	
 	if ( (currentPosition + expectedDisplacement) >= 1 ) {
 		
@@ -41,4 +41,3 @@ float new_position(float currentPosition , float expectedDisplacement , float ra
 	}
 	
 }
-

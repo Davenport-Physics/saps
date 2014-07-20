@@ -24,50 +24,62 @@
 
 #include "newtonian.h"
 
-long double momentum_massVelocity(long double M , long double V) {
+inline long double momentum_massVelocity(long double M , long double V) {
 	
 	return M * V;
 	
 }
 
-long double velocity_accelerationTime( long double A , long double T) {
+inline long double velocity_accelerationTime( long double A , long double T) {
 	
 	return A * T;
 
 }
 
-long double force_massAcceleration(long double M , long double A) {
+inline long double force_massAcceleration(long double M , long double A) {
 	
 	return M * A;
 	
 }
 
-long double mass_forceAcceleration( long double F , long double A ) {
+inline long double mass_forceAcceleration( long double F , long double A ) {
 	
 	return F / A;
 
 }
 
-long double acceleration_forceMass( long double F , long double M ) {
+inline long double acceleration_forceMass( long double F , long double M ) {
 	
 	return F / M;
 
 }
 
-long double metres_velocityTime( long double V , long double T ) {
+inline long double metres_velocityTime( long double V , long double T ) {
 	
 	return V * T;
 	
 }
 
-long double velocity_metresTime( long double M , long double T ) {
+inline long double velocity_metresTime( long double M , long double T ) {
 	
 	return M / T;
 
 }
 
-long double time_velocityMetres( long double V , long double M ) {
+inline long double time_velocityMetres( long double V , long double M ) {
 	
 	return V / M;
 
+}
+
+void boundary_xy(struct movement *current) {
+	
+	
+	
+}
+
+void boundary_yz(struct movement *current) {
+	
+	
+	
 }

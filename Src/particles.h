@@ -47,6 +47,7 @@ struct location {
 struct amount {
 	
 	int amountElectron, amountProton, amountNeutron;
+	int total , ready;
 	
 };
 
@@ -56,7 +57,7 @@ struct location *neutronLocations;
 
 struct amount *numParticles;
 
-void init_particle_constants();
+void init_particle();
 
 void *proton( void * );
 void *electron( void * );

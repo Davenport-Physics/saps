@@ -27,9 +27,6 @@
 
 #include <math.h>
 
-float new_position(float currentPosition , float expectedDisplacement , float radius );
-
-float boundary_xy();
-float boundary_yz();
+long double new_position(long double currentPosition , long double expectedDisplacement , long double radius );
 
 #endif

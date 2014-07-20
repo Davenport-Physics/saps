@@ -25,7 +25,7 @@
 #define NEWTONIAN_H
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <math.h>
 
 struct movement {
 	
@@ -40,16 +40,18 @@ struct movement {
 };
 
 
-long double momentum_massVelocity( long double  , long double );
-long double velocity_accelerationTime( long double , long double );
+inline long double momentum_massVelocity( long double  , long double );
+inline long double velocity_accelerationTime( long double , long double );
 
-long double force_massAcceleration( long double ,long double );
-long double mass_forceAcceleration( long double , long double );
-long double acceleration_forceMass( long double , long double );
+inline long double force_massAcceleration( long double ,long double );
+inline long double mass_forceAcceleration( long double , long double );
+inline long double acceleration_forceMass( long double , long double );
 
-long double metres_velocityTime( long double , long double );
-long double velocity_metresTime( long double , long double );
-long double time_velocityMetres( long double , long double );
+inline long double metres_velocityTime( long double , long double );
+inline long double velocity_metresTime( long double , long double );
+inline long double time_velocityMetres( long double , long double );
 
+void boundary_xy(struct movement *current);
+void boundary_yz(struct movement *current);
 
 #endif

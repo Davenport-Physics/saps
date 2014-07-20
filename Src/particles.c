@@ -57,29 +57,34 @@ struct particle {
  * 3 - Proton/Electron
  * 
  * */
+ pthread_mutex_t ready;
 
 struct particle electronAttributes;
 struct particle protonAttributes;
 
-float get_float();
+struct timespec *hold;
+
+inline float get_float();
 
 void check_system();
-
-void calculate_difference( int index1 , int index2 , long double *x , long double *y , long double *z , int type );
-							 
+void calculate_difference( int index1 , int index2 , long double *x , long double *y , long double *z , int type );		 
 void calculate_force( int index1 , int index2 , struct movement *this );
 void calculate_acceleration( long double mass , struct movement *this );
 void calculate_velocity( int index1, int index2 , long double time , struct movement *this );
 void calculate_displacement( int index1 , int index2 , long double time , struct movement *this);
 void calculate_components( long double x , long double y , long double z , struct movement *this , int type );
 
-void init_particle_constants() {
+void init_particle() {
 	
 	electronAttributes.mass = 9.10938188e-31;
 	electronAttributes.charge = -1.60217646e-19;
 	
 	protonAttributes.mass = 1.67262158e-27;
 	protonAttributes.charge = 1.60217646e-19;
+	
+	hold = ( struct timespec *)malloc( sizeof( struct timespec ) );
+	hold[0].tv_sec = 0;
+	hold[0].tv_nsec = 250000000;
 
 }
 
@@ -87,12 +92,10 @@ void *electron( void *loc ) {
 
 	int x = 0;
 	
+	long double temp;
+	
 	int *index = (int *)loc;
 	struct movement current = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	
-	struct timespec *hold = ( struct timespec *)malloc( sizeof( struct timespec ) );
-	hold[0].tv_sec = 0;
-	hold[0].tv_nsec = 250000000;
 	
 	electronLocations[*index].x = get_float() - get_float();
 	electronLocations[*index].y = get_float() - get_float();
@@ -117,6 +120,13 @@ void *electron( void *loc ) {
 	}
 	electronLocations[*index].radius = (1 + electronLocations[*index].z) / 33.33;
 	electronLocations[*index].done = 1;
+	
+	pthread_mutex_lock(&ready);
+	
+		numParticles[0].ready += 1;
+	
+	pthread_mutex_unlock(&ready);
+	
 	check_system();
 	
 	//Math can only be done two numbers at a time.
@@ -173,10 +183,11 @@ void *electron( void *loc ) {
 		 * 
 		 * {@ 
 		 * */
-		float temp = new_position(electronLocations[*index].x , current.displacementX , electronLocations[*index].radius);
+		temp = new_position(electronLocations[*index].x , current.displacementX , electronLocations[*index].radius);
 		if ( current.displacementX != temp ) {
 			
 			electronLocations[*index].x = temp;
+			
 		
 		} else {
 		
@@ -224,6 +235,7 @@ void *proton( void *loc ) {
 	
 	
 	int x = 0;
+	float temp;
 	
 	int *index = (int *)loc;
 	
@@ -271,6 +283,13 @@ void *proton( void *loc ) {
 	
 	protonLocations[*index].radius = ( 1 + protonLocations[*index].z ) / 22.22;
 	protonLocations[*index].done = 1;
+	
+	pthread_mutex_lock(&ready);
+	
+		numParticles[0].ready += 1;
+	
+	pthread_mutex_unlock(&ready);
+	
 	check_system();
 	
 	
@@ -309,7 +328,7 @@ void *proton( void *loc ) {
 			
 		}
 		
-		float temp = new_position(protonLocations[*index].x , current.displacementX , protonLocations[*index].radius);
+		temp = new_position(protonLocations[*index].x , current.displacementX , protonLocations[*index].radius);
 		if ( current.displacementX != temp ) {
 			
 			protonLocations[*index].x = temp;
@@ -355,7 +374,7 @@ void *proton( void *loc ) {
 	
 }
 
-float get_float() {
+inline float get_float() {
 	
 	return ( float )rand()/( float )RAND_MAX;
 
@@ -363,26 +382,11 @@ float get_float() {
 
 void check_system() {
 	
-	int x;
 	
-	//checks to see if the system is ready. If done == 0, particle is not ready.
-	for ( x = 0; x < numParticles[0].amountElectron;x++ ) {
-			
-		if ( electronLocations[x].done == 0 ) {
-				
-			x--;
-			
-		}
+	while ( numParticles[0].ready != numParticles[0].total ) {
 		
-	}
-	for ( x = 0;x < numParticles[0].amountProton; x++ ) {
+		nanosleep( hold , NULL );
 		
-		if ( protonLocations[x].done == 0 ) {
-		
-			x--;
-			
-		}
-	
 	}
 	
 }

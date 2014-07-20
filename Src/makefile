@@ -2,7 +2,7 @@ OBJS = main.o particles.o constants.o newtonian.o elements.o electric.o systemti
 CC = gcc
 DEBUG = -g
 CFLAGS = -Wall -O3 -c -mtune=native -march=native $(DEBUG)
-LFLAGS = -Wall -lpthread -lGL -lSDL2 -lm $(DEBUG)
+LFLAGS = -lpthread -lGL -lSDL2 -lm $(DEBUG)
 
 physics : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o physics

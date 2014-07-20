@@ -38,8 +38,6 @@ void *constructor(void *n);
 int numElectron = 0, numProton = 0, numNeutron = 0;
 int readyElectron = 0, readyProton = 0;
 
-const float fps = 1000/60;
-
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
@@ -101,8 +99,7 @@ int main(int argc, char **argv)
 	}
 	
 	
-	
-	engine_quit(); 
+	 
 	exit(EXIT_SUCCESS);
 	return 0;
 }
@@ -137,9 +134,10 @@ void *constructor(void *n) {
 	numParticles[0].amountElectron = numElectron;
 	numParticles[0].amountProton = numProton;
 	numParticles[0].amountNeutron = numNeutron;
+	numParticles[0].total = numElectron + numProton + numNeutron;
 	
 	init_constants();
-	init_particle_constants();
+	init_particle();
 	
 	pthread_create( &systemThread, NULL, system_clock, ( void *)0 );
 	for (x = 0; x < numElectron; x++) {
