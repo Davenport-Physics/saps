@@ -62,7 +62,7 @@ struct particle {
 struct particle electronAttributes;
 struct particle protonAttributes;
 
-struct timespec *hold;
+struct timespec hold;
 
 inline float get_float();
 
@@ -82,10 +82,13 @@ void init_particle() {
 	protonAttributes.mass = 1.67262158e-27;
 	protonAttributes.charge = 1.60217646e-19;
 	
-	hold = ( struct timespec *)malloc( sizeof( struct timespec ) );
-	hold[0].tv_sec = 0;
-	hold[0].tv_nsec = 250000000;
+	hold.tv_sec = 0;
+	hold.tv_nsec = 250000000;
 
+}
+void quit_particle() {
+
+	
 }
 
 void *electron( void *loc ) {
@@ -222,10 +225,9 @@ void *electron( void *loc ) {
 	
 		initialTime = time;
 		time += get_system_time();
-		nanosleep( hold, NULL );
+		nanosleep( &hold, NULL );
 	
 	}
-	
 	
 	pthread_exit(EXIT_SUCCESS);
 	
@@ -240,10 +242,6 @@ void *proton( void *loc ) {
 	int *index = (int *)loc;
 	
 	struct movement current = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	struct timespec *hold = ( struct timespec *)malloc( sizeof( struct timespec ) );
-	hold[0].tv_sec = 0;
-	hold[0].tv_nsec = 250000000;
-	
 	
 	protonLocations[*index].x = get_float() - get_float();
 	protonLocations[*index].y = get_float() - get_float();
@@ -332,6 +330,7 @@ void *proton( void *loc ) {
 		if ( current.displacementX != temp ) {
 			
 			protonLocations[*index].x = temp;
+			boundary(&current, XY);
 		
 		} else {
 		
@@ -343,6 +342,7 @@ void *proton( void *loc ) {
 		if ( current.displacementY !=  temp ) {
 		
 			protonLocations[*index].y = temp;
+			boundary(&current, XY);
 			
 		} else {
 		
@@ -354,6 +354,7 @@ void *proton( void *loc ) {
 		if ( current.displacementZ != temp ) {
 		
 			protonLocations[*index].z = temp;
+			boundary(&current, YZ);
 			
 		} else {
 		
@@ -366,7 +367,7 @@ void *proton( void *loc ) {
 		
 		initialTime = time;
 		time += get_system_time();
-		nanosleep( hold , NULL );
+		nanosleep( &hold , NULL );
 	
 	}
 
@@ -385,7 +386,7 @@ void check_system() {
 	
 	while ( numParticles[0].ready != numParticles[0].total ) {
 		
-		nanosleep( hold , NULL );
+		nanosleep( &hold , NULL );
 		
 	}
 	
@@ -500,7 +501,7 @@ void calculate_velocity( int index1 , int index2 ,  long double time , struct mo
 
 void calculate_displacement( int index1 , int index2 , long double time , struct movement *this ) {
 	
-	long double scale = 20;
+	long double scale = 1;
 	
 	
 	switch ( this->type ) {

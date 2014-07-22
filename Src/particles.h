@@ -58,6 +58,7 @@ struct location *neutronLocations;
 struct amount *numParticles;
 
 void init_particle();
+void quit_particle();
 
 void *proton( void * );
 void *electron( void * );

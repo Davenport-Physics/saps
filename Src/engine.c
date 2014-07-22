@@ -196,5 +196,7 @@ void *engine_event(void *n) {
 		}
 		
 	}
+	
 	pthread_exit(EXIT_SUCCESS);
+	
 }

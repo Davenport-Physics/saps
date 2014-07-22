@@ -72,14 +72,44 @@ inline long double time_velocityMetres( long double V , long double M ) {
 
 }
 
-void boundary_xy(struct movement *current) {
+void boundary(struct movement *current , int type) {
 	
+	long double *x;
+	long double *y;
 	
+	long double xytheta;
 	
-}
-
-void boundary_yz(struct movement *current) {
+	if (type == XY) {
 	
+		x = &current->velocityX;
+		y = &current->velocityY;
 	
+	} else {
+	
+		x = &current->velocityY;
+		y = &current->velocityZ;
+		
+	}
+	
+	if ( *x >= 0 && *y >= 0 ) {
+	
+		xytheta = atan(*y / *x) + M_PI/2;
+		
+	} else if ( *x <= 0 && *y >= 0) {
+	
+		xytheta = atan(*y / *x) + M_PI/2;
+		
+	} else if ( *x <= 0 && *y <= 0 ) {
+		
+		xytheta = atan(*y / *x) - M_PI/2;
+	
+	} else {
+	
+		xytheta =  ((3 * M_PI)/2) * atan(*y / *x);
+		
+	}
+	
+	*x = *x * cos(xytheta);
+	*y = *y * sin(xytheta);
 	
 }

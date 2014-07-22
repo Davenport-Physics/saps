@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#define XY 0
+#define YZ 1
+
 struct movement {
 	
 	int type;
@@ -51,7 +54,6 @@ inline long double metres_velocityTime( long double , long double );
 inline long double velocity_metresTime( long double , long double );
 inline long double time_velocityMetres( long double , long double );
 
-void boundary_xy(struct movement *current);
-void boundary_yz(struct movement *current);
+void boundary(struct movement *current, int type);
 
 #endif

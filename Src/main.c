@@ -169,17 +169,19 @@ void *constructor(void *n) {
 	
 	}
 	
-	for (x = 0;x < readyElectron;x++) {
+	for (x = 0;x < numElectron;x++) {
 		
 		pthread_join(electronThread[x], NULL);
 	
 	}
-	for (x = 0;x < readyProton;x++) {
+	for (x = 0;x < numProton;x++) {
 	
 		pthread_join(protonThread[x], NULL);
 		
 	}
 	pthread_join( systemThread, NULL );
+	
+	quit_particle();
 	
 	free( hold );
 	free( electronIndex );
