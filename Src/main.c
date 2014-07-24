@@ -35,9 +35,9 @@
 
 void *constructor(void *n);
 
-struct timespec *hold;
+static struct timespec hold;
 
-int numElectron = 0, numProton = 0, numNeutron = 0;
+static int numElectron = 0, numProton = 0;
 
 int main(int argc, char **argv)
 {
@@ -51,9 +51,8 @@ int main(int argc, char **argv)
 	
 	struct enginevars var;
 	
-	hold = ( struct timespec * )malloc( sizeof( struct timespec ) );
-	hold[0].tv_sec  = 0;
-	hold[0].tv_nsec = 100000000;
+	hold.tv_sec  = 0;
+	hold.tv_nsec = 100000000;
 	
 	while (1) {
 		
@@ -78,9 +77,6 @@ int main(int argc, char **argv)
 	
 			engine_init();
 			pthread_create(&secondary, NULL, constructor, (void *)&var);
-			
-			nanosleep(hold, NULL);
-			
 			pthread_create( &event, NULL, engine_event, ( void *)0);
 			engine_run( &var , types );
 	
@@ -102,10 +98,7 @@ int main(int argc, char **argv)
 			
 		}
 		
-	}
-	
-	
-	free(hold);
+	}	
 	
 	return 0;
 }
@@ -136,7 +129,7 @@ void *constructor(void *n) {
 		
 		while (electronLocations[x].done != 1 ) {
 			
-			nanosleep( hold , NULL );
+			nanosleep( &hold , NULL );
 		
 		}
 		vars->readyElectron += 1;
@@ -150,7 +143,7 @@ void *constructor(void *n) {
 		
 		while (protonLocations[x].done != 1 ) {
 			
-			nanosleep( hold , NULL );
+			nanosleep( &hold , NULL );
 		
 		}
 		vars->readyProton += 1;

@@ -23,16 +23,38 @@
 
 #include "engine.h"
 
+#define SLICES 30.f
+
 void drawParticles( int *readyElectron , int *readyProton );
 void drawCircle(float radius, float triangles);
+void drawCircle_v2(float radius);
 void drawSphere(double r, int lats, int longs);
 
+static float *coscalc;
+static float *sincalc;
 
 SDL_Window* Window;
 
 int engine_init() {
 	
-	SDL_Init (SDL_INIT_VIDEO);
+	float degrees = (360 / SLICES);
+	float current = 0;
+	
+	coscalc = ( float * )malloc( ( SLICES + 1 ) * sizeof( float ));
+	sincalc = ( float * )malloc( ( SLICES + 1 ) * sizeof( float ));
+	
+	int x;
+	for ( x = 0; x < (int)SLICES; x++ ) {
+		
+		coscalc[x] = cos( current * ( M_PI / 180.f ) );
+		sincalc[x] = sin( current * ( M_PI / 180.f ) );
+		current += degrees;
+		
+	}
+	coscalc[(int)SLICES] = cos(0);
+	sincalc[(int)SLICES] = sin(0);
+	
+	SDL_Init(SDL_INIT_VIDEO);
 	
 	Window = SDL_CreateWindow( 
 			"Physics", 
@@ -45,6 +67,19 @@ int engine_init() {
 	return 0;
 
 }
+void engine_quit() {
+	
+	free(coscalc);
+	free(sincalc);
+	
+	coscalc = NULL;
+	sincalc = NULL;
+	
+	SDL_DestroyWindow( Window );
+	SDL_Quit();
+	
+}
+
 void engine_run(struct enginevars *vars, int *types) {
 	
 	int x;
@@ -90,7 +125,8 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 			
 			glColor3f( 0.0f,0.0f,0.0f );
 			glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
-			drawCircle( electronLocations[x].radius, 30);
+			//drawCircle( electronLocations[x].radius, 30);
+			drawCircle_v2(electronLocations[x].radius);
 	
 		glPopMatrix();
 	
@@ -101,7 +137,8 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 		
 			glColor3f( 0.0f,0.0f,1.0f );
 			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-			drawCircle( protonLocations[x].radius, 30);
+			//drawCircle( protonLocations[x].radius, 30);
+			drawCircle_v2(protonLocations[x].radius);
 		
 		glPopMatrix();
 	
@@ -128,6 +165,23 @@ void drawCircle(float radius, float triangles) {
 	
 	glEnd();
 	
+}
+void drawCircle_v2(float radius) {
+	
+	int x;
+	
+	glBegin(GL_TRIANGLES);
+	
+	for ( x = 0; x < (int)SLICES; x++ ) {
+		
+		glVertex3f(radius * coscalc[x] , radius * sincalc[x] , 0.0f);
+		glVertex3f( radius * coscalc[(x+1)] , radius * sincalc[x] , 0.0f );
+		glVertex3f( 0.0f , 0.0f , 0.0f );
+	
+	}
+	
+	glEnd();
+
 }
  void drawSphere(double r, int lats, int longs) {
 	 
@@ -163,13 +217,6 @@ void drawCircle(float radius, float triangles) {
    }
    
  }
-
-void engine_quit() {
-	
-	SDL_DestroyWindow( Window );
-	SDL_Quit();
-	
-}
 
 void *engine_event(void *n) {
 	
