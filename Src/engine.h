@@ -35,8 +35,8 @@
 
 struct enginevars {
 	
-	int *readyElectron;
-	int *readyProton;
+	int readyElectron;
+	int readyProton;
 	
 };
 

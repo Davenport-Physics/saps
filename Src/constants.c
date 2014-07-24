@@ -20,14 +20,3 @@
  * 
  * 
  */
-
-
-#include "constants.h"
-
-void init_constants() {
-	
-	constants[0].plancksConstant = 6.626e+34;
-	constants[0].speedOfLight = 299792458;
-	constants[0].coulombsConstant = 8.9875517873681764e+9;
-
-}

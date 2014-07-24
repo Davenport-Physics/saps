@@ -67,12 +67,12 @@ void engine_run(struct enginevars *vars, int *types) {
 		
 			switch (types[x]) {
 				
-				case 1: drawParticles( vars->readyElectron , vars->readyProton ); break;
+				case 1: drawParticles( &vars->readyElectron , &vars->readyProton ); break;
 			
 			}
 		
 		}
-	
+		glFlush();
 		SDL_GL_SwapWindow(Window);
 		nanosleep( hold , NULL );
 		
@@ -110,7 +110,7 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 }
 void drawCircle(float radius, float triangles) {
 	
-	float degrees = ( 360 / triangles);
+	float degrees = ( 360 / triangles );
 	float current = 0;
 	
 	int x;
@@ -119,9 +119,9 @@ void drawCircle(float radius, float triangles) {
 
 		for ( x = 0; x < (int)triangles; x++) {
 			
-			glVertex3f(radius*cos(current*(M_PI/180)), radius*sin(current*(M_PI/180)) , 0.0f );
+			glVertex3f( radius * cos( current * (M_PI/180) ), radius * sin( current * (M_PI/180) ) , 0.0f );
 			current += degrees;
-			glVertex3f(radius*cos(current*(M_PI/180)), radius*sin(current*(M_PI/180)) , 0.0f );
+			glVertex3f( radius * cos( current * ( M_PI / 180 ) ), radius * sin( current * (M_PI/180) ) , 0.0f );
 			glVertex3f(0.0f, 0.0f, 0.0f);
 		
 		}

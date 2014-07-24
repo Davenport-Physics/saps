@@ -57,12 +57,18 @@ struct particle {
  * 3 - Proton/Electron
  * 
  * */
- pthread_mutex_t ready;
+pthread_mutex_t ready;
 
 struct particle electronAttributes;
 struct particle protonAttributes;
 
-struct timespec hold;
+//extern variables
+struct location *electronLocations;
+struct location *protonLocations;
+struct location *neutronLocations;
+struct amount   *numParticles;
+
+static struct timespec hold;
 
 inline float get_float();
 
@@ -74,7 +80,7 @@ void calculate_velocity( int index1, int index2 , long double time , struct move
 void calculate_displacement( int index1 , int index2 , long double time , struct movement *this);
 void calculate_components( long double x , long double y , long double z , struct movement *this , int type );
 
-void init_particle() {
+void init_particle(int numElectron, int numProton) {
 	
 	electronAttributes.mass = 9.10938188e-31;
 	electronAttributes.charge = -1.60217646e-19;
@@ -84,11 +90,30 @@ void init_particle() {
 	
 	hold.tv_sec = 0;
 	hold.tv_nsec = 250000000;
+	
+	//Holds location in 3 dimensions. Also has a variable to signal other threads it's ready to be interacted with.
+	electronLocations = ( struct location * )malloc( numElectron * sizeof(struct location) );
+	protonLocations = ( struct location * )malloc( numProton * sizeof(struct location) );
+	
+	//Holds the amount of each respective particle.
+	numParticles = ( struct amount * )malloc( sizeof(struct amount) );
+	
+	numParticles->amountElectron = numElectron;
+	numParticles->amountProton = numProton;
+	numParticles->total = numElectron + numProton;
 
 }
-void quit_particle() {
 
+void quit_particles() {
 	
+	free(electronLocations);
+	free(protonLocations);
+	free(numParticles);
+	
+	numParticles	  = NULL;
+	electronLocations = NULL;
+	protonLocations   = NULL;
+
 }
 
 void *electron( void *loc ) {
@@ -144,7 +169,7 @@ void *electron( void *loc ) {
 	 * It compares the position values of other memory locations in in the multiple array's
 	 * 
 	 * */
-	while ( systemFinished == 0 ) {
+	while ( systemFinished == CONTINUE ) {
 	
 		current.type = EL_EL;
 		
@@ -294,7 +319,7 @@ void *proton( void *loc ) {
 	long double time = get_system_time(); 
 	long double initialTime = time;
 	
-	while ( systemFinished == 0 ) {
+	while ( systemFinished == CONTINUE ) {
 		
 		current.type = PR_EL;
 		

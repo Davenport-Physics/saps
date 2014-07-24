@@ -51,13 +51,13 @@ struct amount {
 	
 };
 
-struct location *electronLocations;
-struct location *protonLocations;
-struct location *neutronLocations;
+extern struct location *electronLocations;
+extern struct location *protonLocations;
+extern struct location *neutronLocations;
 
-struct amount *numParticles;
+extern struct amount *numParticles;
 
-void init_particle();
+void init_particle(int numElectron, int numProton);
 void quit_particle();
 
 void *proton( void * );

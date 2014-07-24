@@ -25,22 +25,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
-
-struct data {
-	
-	long double plancksConstant;
-	long double speedOfLight;
-	long double coulombsConstant;
-
-};
-
-struct data *constants;
-
-void init_constants();
-
+#define COULOMBS_CONSTANT 8.9875517873681764e+9
+#define SPEED_OF_LIGHT    299792458
+#define PLANCKS_CONSTANT  6.626e-34
 
 #endif
 

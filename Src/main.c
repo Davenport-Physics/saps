@@ -35,13 +35,13 @@
 
 void *constructor(void *n);
 
+struct timespec *hold;
+
 int numElectron = 0, numProton = 0, numNeutron = 0;
-int readyElectron = 0, readyProton = 0;
 
 int main(int argc, char **argv)
 {
 	srand(time(NULL));
-	
 	
 	pthread_t secondary;
 	pthread_t event;
@@ -51,10 +51,14 @@ int main(int argc, char **argv)
 	
 	struct enginevars var;
 	
-	var.readyElectron = &readyElectron;
-	var.readyProton = &readyProton;
+	hold = ( struct timespec * )malloc( sizeof( struct timespec ) );
+	hold[0].tv_sec  = 0;
+	hold[0].tv_nsec = 100000000;
 	
 	while (1) {
+		
+		var.readyElectron = 0;
+		var.readyProton   = 0;
 		
 		types[0] = 0;
 		types[1] = 0;
@@ -73,10 +77,12 @@ int main(int argc, char **argv)
 			scanf("%d", &numProton);
 	
 			engine_init();
-			pthread_create(&secondary, NULL, constructor, (void *)0);
+			pthread_create(&secondary, NULL, constructor, (void *)&var);
+			
+			nanosleep(hold, NULL);
+			
 			pthread_create( &event, NULL, engine_event, ( void *)0);
 			engine_run( &var , types );
-	
 	
 			pthread_join(event, NULL);
 			pthread_join(secondary, NULL);
@@ -99,45 +105,27 @@ int main(int argc, char **argv)
 	}
 	
 	
-	 
-	exit(EXIT_SUCCESS);
+	free(hold);
+	
 	return 0;
 }
 void *constructor(void *n) {
 	
 	int x;
 	
-	//stops for a tenth of a second.
-	struct timespec *hold = ( struct timespec * )malloc( sizeof( struct timespec ) );
-	hold[0].tv_sec = 0;
-	hold[0].tv_nsec = 100000000;
-	
 	pthread_t electronThread[numElectron];
 	pthread_t protonThread[numProton];
 	pthread_t systemThread;
 	
+	struct enginevars *vars = (struct enginevars *)n;
+	
 	//Holds the Index value of the current particle
 	int *electronIndex = ( int * )malloc( numElectron * sizeof(int) );
-	int *protonIndex = ( int * )malloc( numElectron * sizeof(int) );
-	
-	//Holds location in 3 dimensions. Also has a variable to signal other threads it's ready to be interacted with.
-	electronLocations = ( struct location * )malloc( numElectron * sizeof(struct location) );
-	protonLocations = ( struct location * )malloc( numProton * sizeof(struct location) );
-	
-	//Holds the amount of each respective particle.
-	numParticles = ( struct amount * )malloc( sizeof(struct amount) );
-	
-	constants = ( struct data * )malloc( sizeof(struct data) );
+	int *protonIndex = ( int * )malloc( numProton * sizeof(int) );
 	
 	//systemFinished is the variable each thread look at to keep them running.
 	systemFinished = CONTINUE;
-	numParticles[0].amountElectron = numElectron;
-	numParticles[0].amountProton = numProton;
-	numParticles[0].amountNeutron = numNeutron;
-	numParticles[0].total = numElectron + numProton + numNeutron;
-	
-	init_constants();
-	init_particle();
+	init_particle(numElectron, numProton);
 	
 	pthread_create( &systemThread, NULL, system_clock, ( void *)0 );
 	for (x = 0; x < numElectron; x++) {
@@ -151,7 +139,7 @@ void *constructor(void *n) {
 			nanosleep( hold , NULL );
 		
 		}
-		readyElectron += 1;
+		vars->readyElectron += 1;
 	
 	}
 	for (x = 0;x < numProton; x++) {
@@ -165,7 +153,7 @@ void *constructor(void *n) {
 			nanosleep( hold , NULL );
 		
 		}
-		readyProton += 1;
+		vars->readyProton += 1;
 	
 	}
 	
@@ -181,16 +169,14 @@ void *constructor(void *n) {
 	}
 	pthread_join( systemThread, NULL );
 	
-	quit_particle();
-	
-	free( hold );
 	free( electronIndex );
 	free( protonIndex );
 	free( numParticles );
 	free( electronLocations );
 	free( protonLocations );
-	free( constants );
 	
+	electronIndex	  = NULL;
+	protonIndex		  = NULL;
 	
 	pthread_exit(EXIT_SUCCESS);
 	
