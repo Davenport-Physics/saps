@@ -113,7 +113,12 @@ int main(int argc, char **argv)
 			
 			break;
 			
-		} else {
+		} else if ( strcmp(type , "help") == 0) {
+			
+			puts("\nparticles			Initiates particle simulation\n"
+				 "quit				Quits the program\n");
+			
+		}else {
 			
 			printf("That is not a correct type of operation\n");
 			
