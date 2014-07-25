@@ -33,6 +33,13 @@
 #include "particles.h"
 #include "systemtime.h"
 
+enum engine_runtime {
+
+	NORMAL = 0,
+	DEBUG
+	
+};
+
 struct enginevars {
 	
 	int readyElectron;
@@ -41,7 +48,7 @@ struct enginevars {
 };
 
 int engine_init();
-void engine_run(struct enginevars *vars, int *types);
+void engine_run(struct enginevars *vars, int *types, enum engine_runtime runtime);
 void engine_quit();
 
 void *engine_event(void *n);

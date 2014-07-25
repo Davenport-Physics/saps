@@ -54,6 +54,27 @@ int main(int argc, char **argv)
 	hold.tv_sec  = 0;
 	hold.tv_nsec = 100000000;
 	
+	enum engine_runtime runtime = NORMAL;
+	
+	if (argc > 1) {
+		
+		int x;
+		for ( x = 1; x < argc; x++ ) {
+		
+			if (strcasecmp(argv[x],"debug") == 0) {
+			
+				runtime = DEBUG;
+				
+			} else {
+			
+				printf("%s is not a valid command" , argv[x]);
+				
+			}
+		
+		}
+		
+	}
+	
 	while (1) {
 		
 		var.readyElectron = 0;
@@ -78,7 +99,7 @@ int main(int argc, char **argv)
 			engine_init();
 			pthread_create(&secondary, NULL, constructor, (void *)&var);
 			pthread_create( &event, NULL, engine_event, ( void *)0);
-			engine_run( &var , types );
+			engine_run( &var , types , runtime);
 	
 			pthread_join(event, NULL);
 			pthread_join(secondary, NULL);

@@ -80,7 +80,7 @@ void engine_quit() {
 	
 }
 
-void engine_run(struct enginevars *vars, int *types) {
+void engine_run(struct enginevars *vars, int *types, enum engine_runtime runtime) {
 	
 	int x;
 	
@@ -93,23 +93,37 @@ void engine_run(struct enginevars *vars, int *types) {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	
-	while (systemFinished == 0) {
+	if (runtime == NORMAL) {
+	
+		while (systemFinished == 0) {
 		
-		glClear(GL_COLOR_BUFFER_BIT);
-		glLoadIdentity();
+			glClear(GL_COLOR_BUFFER_BIT);
+			glLoadIdentity();
 		
-		for ( x = 0; x < 3; x++ ) {
+			for ( x = 0; x < 3; x++ ) {
 		
-			switch (types[x]) {
+				switch (types[x]) {
 				
-				case 1: drawParticles( &vars->readyElectron , &vars->readyProton ); break;
+					case 1: drawParticles( &vars->readyElectron , &vars->readyProton ); break;
 			
+				}
+		
 			}
+			SDL_GL_SwapWindow(Window);
+			nanosleep( &hold , NULL );
 		
 		}
-		glFlush();
-		SDL_GL_SwapWindow(Window);
-		nanosleep( &hold , NULL );
+	} else {
+	
+		while (systemFinished == 0) {
+		
+			glClear(GL_COLOR_BUFFER_BIT);
+			glLoadIdentity();
+			
+			SDL_GL_SwapWindow(Window);
+			nanosleep( &hold , NULL );
+			
+		}
 		
 	}
 	SDL_GL_DeleteContext(glcontext);

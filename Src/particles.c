@@ -24,10 +24,13 @@
 
 #include "particles.h"
 
-#define EL_EL 0
-#define EL_PR 1
-#define PR_PR 2
-#define PR_EL 3
+enum {
+	EL_EL = 0,
+	EL_PR,
+	PR_PR,
+	PR_EL
+	
+};
 
 /*
  * 
