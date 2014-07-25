@@ -37,6 +37,16 @@
 #include "newtonian.h"
 #include "mechanics.h"
 
+#define ELECTRON 0
+#define PROTON 1
+#define NEUTRON 2
+
+#define ELECTRON_MASS    9.10938188e-31
+#define ELECTRON_CHARGE -1.60217646e-19 
+
+#define PROTON_MASS      1.67262158e-27
+#define PROTON_CHARGE    1.60217646e-19
+
 struct location {
 	
 	float x, y, z;
@@ -44,6 +54,14 @@ struct location {
 	int done;
 	
 };
+
+struct particle_attributes {
+	
+	int          index , type;
+	long double  mass  , charge; 
+	
+};
+
 struct amount {
 	
 	int amountElectron, amountProton, amountNeutron;
@@ -62,6 +80,6 @@ void quit_particle();
 
 void *proton( void * );
 void *electron( void * );
-void *nuetron( void * );
+void *particles(void *);
 
 #endif

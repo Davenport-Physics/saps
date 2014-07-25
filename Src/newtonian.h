@@ -30,6 +30,10 @@
 #define XY 0
 #define YZ 1
 
+#define FORCE        0
+#define ACCELERATION 1
+#define VELOCITY     2
+
 struct movement {
 	
 	int type;
