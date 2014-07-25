@@ -84,9 +84,9 @@ void engine_run(struct enginevars *vars, int *types) {
 	
 	int x;
 	
-	struct timespec *hold = ( struct timespec *)malloc( sizeof ( struct timespec ) );
-	hold[0].tv_sec = 0;
-	hold[0].tv_nsec = 1666666;
+	struct timespec hold;
+	hold.tv_sec = 0;
+	hold.tv_nsec = 1666666;
 	
 	SDL_GLContext glcontext = SDL_GL_CreateContext(Window);
 	
@@ -109,7 +109,7 @@ void engine_run(struct enginevars *vars, int *types) {
 		}
 		glFlush();
 		SDL_GL_SwapWindow(Window);
-		nanosleep( hold , NULL );
+		nanosleep( &hold , NULL );
 		
 	}
 	SDL_GL_DeleteContext(glcontext);

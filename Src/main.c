@@ -149,7 +149,7 @@ void *constructor(void *n) {
 		
 		while (protonLocations[x].done != 1 ) {
 			
-			nanosleep( &hold , NULL );
+			nanosleep( &hold , NULLha );
 		
 		}
 		vars->readyProton += 1;
@@ -168,6 +168,7 @@ void *constructor(void *n) {
 	}
 	pthread_join( systemThread, NULL );
 	quit_particles();
+	
 	
 	free( electronAttributes );
 	free( protonAttributes );
