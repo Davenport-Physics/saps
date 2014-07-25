@@ -128,7 +128,7 @@ void *constructor(void *n) {
 		electronAttributes[x].mass   = ELECTRON_MASS;
 		electronAttributes[x].charge = ELECTRON_CHARGE; 
 		electronLocations[x].done    = 0;
-		pthread_create( &electronThread[x], NULL, electron , (void *)&electronAttributes[x] );
+		pthread_create( &electronThread[x], NULL, particles , (void *)&electronAttributes[x] );
 		
 		while (electronLocations[x].done != 1 ) {
 			
@@ -144,12 +144,12 @@ void *constructor(void *n) {
 		protonAttributes[x].type   = PROTON;
 		protonAttributes[x].mass   = PROTON_MASS;
 		protonAttributes[x].charge = PROTON_CHARGE;
-		protonLocations[x].done = 0;
-		pthread_create( &protonThread[x], NULL , proton , (void *)&protonAttributes[x] );
+		protonLocations[x].done    = 0;
+		pthread_create( &protonThread[x], NULL , particles , (void *)&protonAttributes[x] );
 		
 		while (protonLocations[x].done != 1 ) {
 			
-			nanosleep( &hold , NULLha );
+			nanosleep( &hold , NULL );
 		
 		}
 		vars->readyProton += 1;

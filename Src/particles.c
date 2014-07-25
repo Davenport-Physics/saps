@@ -54,8 +54,8 @@ static struct timespec hold;
 
 inline float get_float();
 
-void get_random_location(int index, int type);
-void compare_locations(int index, int type);
+void get_random_location(int index, struct location *thisParticle);
+void compare_locations(int index, struct location *thisParticle);
 struct location *this_that(int type, int count );
 
 void check_system();
@@ -106,7 +106,9 @@ void *particles(void *att) {
 	switch (attr->type) {
 	
 		case ELECTRON: thisParticle = electronLocations; break;
-		case PROTON:   thisParticle = protonLocations;   break;
+		case PROTON  : thisParticle = protonLocations;   break;
+		
+		default: printf("No type specified\n"); pthread_exit(EXIT_SUCCESS); break;
 		
 	}
 	
@@ -115,15 +117,15 @@ void *particles(void *att) {
 	
 	const long double mass   = attr->mass;
 	
-	get_random_location( index , type );
-	compare_locations( index , type );
+	get_random_location( index , thisParticle);
+	compare_locations( index , thisParticle );
 	
 	thisParticle[index].radius = ( 1 + thisParticle[index].z ) / 22.22;
 	thisParticle[index].done = 1;
 	
 	pthread_mutex_lock(&ready);
 	
-		numParticles->ready += 1;
+		numParticles->ready++;
 	
 	pthread_mutex_unlock(&ready);
 	
@@ -239,9 +241,8 @@ void *particles(void *att) {
 			thisParticle[index].z += current.displacementZ;
 		
 		}
-		/* @} */
 	
-		electronLocations[index].radius = (1 + electronLocations[index].z) / 33.33;
+		thisParticle[index].radius = (1 + thisParticle[index].z) / 22.22;
 	
 		initialTime = time;
 		time += get_system_time();
@@ -254,93 +255,56 @@ void *particles(void *att) {
 	pthread_exit(EXIT_SUCCESS);
 }
 
-void get_random_location(int index, int type) {
+void get_random_location(int index, struct location *thisParticle) {
 	
-	struct location *thisParticle;
-	
-	switch (type) {
-	
-		case ELECTRON:
-		
-			thisParticle = electronLocations;
-			
-		break;
-		case PROTON:
-		
-			thisParticle = protonLocations;
-
-		break;
-		
-	}
 	thisParticle[index].x = get_float() - get_float();
 	thisParticle[index].y = get_float() - get_float();
 	thisParticle[index].z = get_float() - get_float();
 	
 }
 
-void compare_locations( int index, int type ) {
+void compare_locations( int index, struct location *thisParticle ) {
 	
-	int x;
+	int x, y;
+	int amountParticles;
 	
 	int done = 0;
 	
-	switch (type) {
+	struct location *thatParticle;
+			
+	while (done == 0) {
+				
+		done = 1;
 		
-		case ELECTRON:
-		
-			for (x = 0; x < index; x++) {
+		thatParticle    = electronLocations;
+		amountParticles = numParticles->amountElectron;
+		for (y = 0; y < 2 ; y++) {
 			
-				if ( electronLocations[index].x == electronLocations[x].x && 
-					 electronLocations[index].y == electronLocations[x].y &&
-					 electronLocations[index].z == electronLocations[x].z ) {
+			for ( x = 0; x <  amountParticles; x++) {
+				
+				if ( thisParticle == thatParticle && x == index ) {
 					
+					continue;
 				
-					 get_random_location( index , ELECTRON);
-					 x = 0;
-				
-				}
-				
-			}
-			
-		break;
-		case PROTON:
-			
-			while (done == 0) {
-				
-				done = 1;
-				for (x = 0; x < numParticles->amountElectron; x++) {
-			
-					if ( protonLocations[index].x == electronLocations[x].x && 
-						 protonLocations[index].y == electronLocations[x].y &&
-						 protonLocations[index].z == electronLocations[x].z ) {
-					
-				
-						get_random_location( index , PROTON);
-						x = 0;
-				
-					}
-				
-				}
-				for ( x = 0; x < index;x++ ) {
-			
-					if ( protonLocations[index].x == protonLocations[x].x &&
-						 protonLocations[index].y == protonLocations[x].y &&
-						 protonLocations[index].z == protonLocations[x].z) {
+				} else if ( thisParticle[index].x == thatParticle[x].x &&
+					thisParticle[index].y == thatParticle[x].y &&
+				    thisParticle[index].z == thatParticle[x].z) {
 					 
-							get_random_location( index , PROTON );	
-							x = 0;
-							
-							done = 0;
+						get_random_location( index , thisParticle );	
+					
+						x    = 0;		
+						done = 0;
 				
-					}
-			
 				}
 				
 			}
+			thatParticle    = protonLocations;
+			amountParticles = numParticles->amountProton;
 		
-		break;
+		}
+			
 	}
-	
+		
 }
 
 struct location *this_that(int type, int count) {
@@ -435,6 +399,8 @@ void calculate_force( int index1 , int index2 ,  struct movement *this ) {
 		
 		case PR_EL:
 		case EL_PR: first = ELECTRON_CHARGE; second = PROTON_CHARGE; break;
+		
+		default   : first = 0; second = 0; break;
 	
 	
 	}
