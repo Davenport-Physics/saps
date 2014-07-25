@@ -66,7 +66,7 @@ void calculate_velocity( int index1, int index2 , long double time , struct move
 void calculate_displacement( int index1 , int index2 , long double time , struct movement *this);
 void calculate_components( long double x , long double y , long double z , struct movement *this , int type );
 
-void init_particle(int numElectron, int numProton) {
+void init_particles(int numElectron, int numProton) {
 	
 	hold.tv_sec = 0;
 	hold.tv_nsec = 250000000;
@@ -113,6 +113,8 @@ void *particles(void *att) {
 	const int index = attr->index;
 	const int type  = attr->type;
 	
+	const long double mass   = attr->mass;
+	
 	get_random_location( index , type );
 	compare_locations( index , type );
 	
@@ -130,54 +132,121 @@ void *particles(void *att) {
 	long double time = get_system_time();
 	long double initialTime = time;
 	
+	int x;
+	long double temp;
+	
+	int amountParticle;
 	while (systemFinished == CONTINUE) {
 		
-		int x;
-	
-		long double temp;
+		amountParticle = 0;
 		
 		switch (type) {
 		
-			case ELECTRON: current.type = EL_EL; break;
-			case PROTON  : current.type = EL_PR; break;  
+			case ELECTRON: 
+			
+				current.type = EL_EL;
+				amountParticle = numParticles->amountElectron;
+			
+			break;
+			case PROTON  : 
+			
+				current.type = PR_PR;
+				amountParticle = numParticles->amountProton;
+			
+			break;  
 			
 		}
-		for (x = 0; x < numParticles->amountElectron; x++) {
+		for (x = 0; x < amountParticle; x++) {
 			
-			if ( index == x && current.type == EL_EL ) {
+			if ( index == x ) {
 			
 				continue;
 				
 			} else {
 			
 				calculate_force( index, x , &current );
-				calculate_acceleration( ELECTRON_MASS , &current );
+				calculate_acceleration( mass , &current );
 				calculate_velocity( index , x ,  time - initialTime , &current );					
 				calculate_displacement( index , x , time - initialTime , &current );
 			
 			}
 		
 		}
-		if (type == PROTON) {
+		amountParticle = 0;
+		switch (type) {
 		
-			for (x = 0; x < numParticles->amountProton; x++) {
+			case ELECTRON: 
 			
-				if ( index == x ) {
-				
-					continue;
-					
-				} else {
-					
-					calculate_force( index , x , &current );
-					calculate_acceleration( PROTON_MASS , &current );
-					calculate_velocity( index , x , time - initialTime , &current );
-					calculate_displacement( index , x , time - initialTime , &current );
-					
-				}
-				
-			}
+				current.type = EL_PR;
+				amountParticle = numParticles->amountProton;
+			
+			break;
+			case PROTON  : 
+			
+				current.type = PR_EL;
+				amountParticle = numParticles->amountElectron;
+			
+			break;  
 			
 		}
+		for (x = 0; x < amountParticle; x++) {
+			
+			if ( index == x ) {
+			
+				continue;
+				
+			} else {
+			
+				calculate_force( index, x , &current );
+				calculate_acceleration( mass , &current );
+				calculate_velocity( index , x ,  time - initialTime , &current );					
+				calculate_displacement( index , x , time - initialTime , &current );
+			
+			}
+		
+		}
+		
+		temp = new_position(thisParticle[index].x , current.displacementX , thisParticle[index].radius);
+		if ( current.displacementX != temp ) {
+			
+			thisParticle[index].x = temp;
+			
+		
+		} else {
+		
+			thisParticle[index].x += current.displacementX;
+		
+		}
+		
+		temp = new_position(thisParticle[index].y , current.displacementY , thisParticle[index].radius);
+		if ( current.displacementY !=  temp ) {
+		
+			thisParticle[index].y = temp;
+			
+		} else {
+		
+			thisParticle[index].y += current.displacementY;
+			
+		}
+		
+		temp = new_position(thisParticle[index].z , current.displacementZ , thisParticle[index].radius);
+		if ( current.displacementZ != temp ) {
+		
+			thisParticle[index].z = temp;
+			
+		} else {
+		
+			thisParticle[index].z += current.displacementZ;
+		
+		}
+		/* @} */
+	
+		electronLocations[index].radius = (1 + electronLocations[index].z) / 33.33;
+	
+		initialTime = time;
+		time += get_system_time();
+		nanosleep( &hold, NULL );
+		
 		
 	}
 	
@@ -458,24 +527,25 @@ void *proton( void *loc ) {
 
 void get_random_location(int index, int type) {
 	
+	struct location *thisParticle;
+	
 	switch (type) {
 	
 		case ELECTRON:
 		
-			electronLocations[index].x = get_float() - get_float();
-			electronLocations[index].y = get_float() - get_float();
-			electronLocations[index].z = get_float() - get_float();
+			thisParticle = electronLocations;
 			
 		break;
 		case PROTON:
 		
-			protonLocations[index].x = get_float() - get_float();
-			protonLocations[index].y = get_float() - get_float();
-			protonLocations[index].z = get_float() - get_float();
-		
+			thisParticle = protonLocations;
+
 		break;
 		
 	}
+	thisParticle[index].x = get_float() - get_float();
+	thisParticle[index].y = get_float() - get_float();
+	thisParticle[index].z = get_float() - get_float();
 	
 }
 
@@ -665,16 +735,19 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 	
 	long double scale = 1;
 	
+	struct location *thisParticle = this_that( this->type , 0 );
+	struct location *thatParticle = this_that( this->type , 1 );
 	
 	switch ( this->type ) {
 		
+		case PR_PR:
 		case EL_EL:
 		
-			if ( electronLocations[index1].x > electronLocations[index2].x && electronLocations[index1].x < 1.0) {
+			if ( thisParticle[index1].x > thatParticle[index2].x && thisParticle[index1].x < 1.0) {
 			
 				this->displacementX += ( metres_velocityTime( this->velocityX , time ) / scale );
 		
-			} else if ( electronLocations[index1].x == electronLocations[index2].x ) {
+			} else if ( thisParticle[index1].x == thatParticle[index2].x ) {
 			
 			
 		
@@ -684,11 +757,11 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 		
 			}
 		
-			if ( electronLocations[index1].y > electronLocations[index2].y && electronLocations[index1].y < 1.0 ) {
+			if ( thisParticle[index1].y > thatParticle[index2].y && thisParticle[index1].y < 1.0 ) {
 			
 				this->displacementY += ( metres_velocityTime( this->velocityY , time ) / scale );
 		
-			} else if ( electronLocations[index1].y == electronLocations[index2].y ) {
+			} else if ( thisParticle[index1].y == thatParticle[index2].y ) {
 			
 				
 		
@@ -698,11 +771,11 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 				
 			}
 		
-			if (electronLocations[index1].z > electronLocations[index2].z && electronLocations[index1].z < 1.0 ) {
+			if (thisParticle[index1].z > thatParticle[index2].z && thisParticle[index1].z < 1.0 ) {
 			
 				this->displacementZ += ( metres_velocityTime( this->velocityZ , time ) / scale );
 		
-			} else if ( electronLocations[index1].z == electronLocations[index2].z ) {
+			} else if ( thisParticle[index1].z == thatParticle[index2].z ) {
 			
 			
 		
@@ -712,107 +785,16 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 			
 			}
 			
-		break;
-		
-		case EL_PR:
-		
-			if ( electronLocations[index1].x > protonLocations[index2].x && electronLocations[index1].x > -1.0 ) {
-				
-				this->displacementX += ( metres_velocityTime( this->velocityX , time ) );
-			
-			} else if ( electronLocations[index1].x == protonLocations[index2].x ) {
-				
-				
-				
-			} else {
-				
-				this->displacementX -= ( metres_velocityTime( this->velocityX , time ) );
-			
-			}
-			
-			if ( electronLocations[index1].y > protonLocations[index2].y && electronLocations[index1].y > -1.0 ) {
-				
-				this->displacementY += ( metres_velocityTime( this->velocityY , time ) );
-			
-			} else if ( electronLocations[index1].y == protonLocations[index2].y ) {
-				
-			
-				
-			} else {
-				
-				this->displacementY -= ( metres_velocityTime( this->velocityY , time ) );
-			
-			}
-			
-			if ( electronLocations[index1].z > protonLocations[index2].z && electronLocations[index1].z > -1.0 ) {
-				
-				this->displacementZ += ( metres_velocityTime( this->velocityZ , time ) );
-			
-			} else if ( electronLocations[index1].z == protonLocations[index2].z ) {
-				
-				
-			
-			} else {
-				
-				this->displacementZ -= ( metres_velocityTime( this->velocityZ , time ) );
-			
-			}
-		
-		break;
-		
-		case PR_PR:
-		
-			if ( protonLocations[index1].x > protonLocations[index2].x && protonLocations[index1].x < 1.0 ) {
-			
-				this->displacementX += ( metres_velocityTime( this->velocityX , time ) / scale );
-		
-			} else if ( protonLocations[index1].x == protonLocations[index2].x ) {
-			
-			
-		
-			} else {
-			
-				this->displacementX -=  ( metres_velocityTime( this->velocityX , time ) / scale );
-		
-			}
-		
-			if ( protonLocations[index1].y > protonLocations[index2].y && protonLocations[index1].y < 1.0 ) {
-			
-				this->displacementY += ( metres_velocityTime( this->velocityY , time ) / scale );
-		
-			} else if ( protonLocations[index1].y == protonLocations[index2].y ) {
-			
-				
-		
-			} else {
-			
-				this->displacementY -= ( metres_velocityTime( this->velocityY , time ) / scale );
-				
-			}
-		
-			if ( protonLocations[index1].z > protonLocations[index2].z && protonLocations[index1].z < 1.0 ) {
-			
-				this->displacementZ += ( metres_velocityTime( this->velocityZ , time ) / scale );
-		
-			} else if ( protonLocations[index1].z == protonLocations[index2].z ) {
-			
-			
-		
-			} else {
-			
-				this->displacementZ -= ( metres_velocityTime( this->velocityZ , time ) / scale );
-			
-			}
-		
 		break;
 		
 		case PR_EL:
+		case EL_PR:
 		
-			if ( protonLocations[index1].x > electronLocations[index2].x && protonLocations[index1].x > -1.0 ) {
+			if ( thisParticle[index1].x > thatParticle[index2].x && thisParticle[index1].x > -1.0 ) {
 				
 				this->displacementX += ( metres_velocityTime( this->velocityX , time ) );
 			
-			} else if ( protonLocations[index1].x == electronLocations[index2].x ) {
+			} else if ( thisParticle[index1].x == thatParticle[index2].x ) {
 				
 				
 				
@@ -822,11 +804,11 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 			
 			}
 			
-			if ( protonLocations[index1].y > electronLocations[index2].y && protonLocations[index1].y > -1.0 ) {
+			if ( thisParticle[index1].y > thatParticle[index2].y && thisParticle[index1].y > -1.0 ) {
 				
 				this->displacementY += ( metres_velocityTime( this->velocityY , time ) );
 			
-			} else if ( protonLocations[index1].y == electronLocations[index2].y ) {
+			} else if ( thisParticle[index1].y == thatParticle[index2].y ) {
 				
 			
 				
@@ -836,11 +818,11 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 			
 			}
 			
-			if ( protonLocations[index1].z > electronLocations[index2].z && protonLocations[index1].z > -1.0 ) {
+			if ( thisParticle[index1].z > thisParticle[index2].z && thisParticle[index1].z > -1.0 ) {
 				
 				this->displacementZ += ( metres_velocityTime( this->velocityZ , time ) );
 			
-			} else if ( protonLocations[index1].z == electronLocations[index2].z ) {
+			} else if ( thisParticle[index1].z == thisParticle[index2].z ) {
 				
 				
 			

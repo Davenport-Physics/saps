@@ -113,19 +113,22 @@ void *constructor(void *n) {
 	struct enginevars *vars = (struct enginevars *)n;
 	
 	//Holds the Index value of the current particle
-	int *electronIndex = ( int * )malloc( numElectron * sizeof(int) );
-	int *protonIndex = ( int * )malloc( numProton * sizeof(int) );
+	struct particle_attributes *electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
+	struct particle_attributes *protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
 	
 	//systemFinished is the variable each thread look at to keep them running.
 	systemFinished = CONTINUE;
-	init_particle(numElectron, numProton);
+	init_particles(numElectron, numProton);
 	
 	pthread_create( &systemThread, NULL, system_clock, ( void *)0 );
 	for (x = 0; x < numElectron; x++) {
 		
-		electronIndex[x] = x;
-		electronLocations[x].done = 0;
-		pthread_create( &electronThread[x], NULL, electron , (void *)&electronIndex[x] );
+		electronAttributes[x].index  = x;
+		electronAttributes[x].type   = ELECTRON;
+		electronAttributes[x].mass   = ELECTRON_MASS;
+		electronAttributes[x].charge = ELECTRON_CHARGE; 
+		electronLocations[x].done    = 0;
+		pthread_create( &electronThread[x], NULL, electron , (void *)&electronAttributes[x] );
 		
 		while (electronLocations[x].done != 1 ) {
 			
@@ -137,9 +140,12 @@ void *constructor(void *n) {
 	}
 	for (x = 0;x < numProton; x++) {
 		
-		protonIndex[x] = x;
+		protonAttributes[x].index  = x;
+		protonAttributes[x].type   = PROTON;
+		protonAttributes[x].mass   = PROTON_MASS;
+		protonAttributes[x].charge = PROTON_CHARGE;
 		protonLocations[x].done = 0;
-		pthread_create( &protonThread[x], NULL , proton , (void *)&protonIndex[x] );
+		pthread_create( &protonThread[x], NULL , proton , (void *)&protonAttributes[x] );
 		
 		while (protonLocations[x].done != 1 ) {
 			
@@ -161,15 +167,13 @@ void *constructor(void *n) {
 		
 	}
 	pthread_join( systemThread, NULL );
+	quit_particles();
 	
-	free( electronIndex );
-	free( protonIndex );
-	free( numParticles );
-	free( electronLocations );
-	free( protonLocations );
+	free( electronAttributes );
+	free( protonAttributes );
 	
-	electronIndex	  = NULL;
-	protonIndex		  = NULL;
+	electronAttributes	  = NULL;
+	protonAttributes	  = NULL;
 	
 	pthread_exit(EXIT_SUCCESS);
 	
