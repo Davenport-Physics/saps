@@ -37,6 +37,13 @@ void drawCircle(float radius, float triangles);
 void drawCircle_v2(float radius);
 void drawSphere(double r, int lats, int longs);
 
+enum {
+
+	FALSE = 0,
+	TRUE
+	
+};
+
 static float *coscalc;
 static float *sincalc;
 
@@ -44,6 +51,11 @@ static float SLICES = 30.f;
 
 //glTranslatef variables
 static float glTf_x, glTf_y, glTf_z;
+
+//glRotationf variables;
+static float glrf_x, glrf_y, glrf_z;
+
+static float angle;
 
 SDL_Window* Window;
 
@@ -116,12 +128,18 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 	int x;
 	
 	struct timespec hold;
-	hold.tv_sec = 0;
+	hold.tv_sec  = 0;
 	hold.tv_nsec = 1666666;
 	
 	glTf_x = 0.0f;
 	glTf_y = 0.0f;
 	glTf_z = 0.0f;
+	
+	glrf_x = 0.0f;
+	glrf_y = 0.0f;
+	glrf_z = 0.0f;
+	
+	angle  = 0.0f;
 	
 	SDL_GLContext glcontext = SDL_GL_CreateContext(Window);
 	
@@ -135,6 +153,8 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 			glClear(GL_COLOR_BUFFER_BIT);
 			glLoadIdentity();
 		
+			glPushMatrix();
+			glRotatef(angle, glrf_x, glrf_y, glrf_z);
 			for ( x = 0; x < typeLength; x++ ) {
 		
 				switch (types[x]) {
@@ -145,6 +165,8 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 				}
 		
 			}
+			glPopMatrix();
+			
 			SDL_GL_SwapWindow(Window);
 			nanosleep( &hold , NULL );
 		
@@ -214,7 +236,6 @@ void drawCircle(float radius, float triangles) {
 		}
 	
 	glEnd();
-	
 }
 
 /*
@@ -297,6 +318,8 @@ void *engine_event(void *n) {
 	
 	SDL_Event event;
 	
+	int dragging = FALSE;
+	
 	while ( systemFinished == CONTINUE ) {
 		
 		while ( SDL_PollEvent( &event ) ) {
@@ -317,8 +340,45 @@ void *engine_event(void *n) {
 					
 				break;
 				
-				case SDL_QUIT: systemFinished = FINISH; break;
-			
+				case SDL_MOUSEMOTION    :
+				
+					if (dragging == TRUE) {
+					
+						if (event.motion.xrel > 0) {
+							
+							glrf_x = 1;
+							angle += 10*(event.motion.xrel);
+							
+						} else if (event.motion.xrel < 0) {
+							
+							glrf_x = -1;
+							angle += 10*(event.motion.xrel);
+						
+						}
+						
+						if (event.motion.yrel > 0) {
+						
+							glrf_y = 1;
+							angle += 10*(event.motion.yrel);
+						
+						} else if (event.motion.yrel < 0) {
+							
+							glrf_y = -1;
+							angle += 10*(event.motion.yrel);
+						}
+						
+					}
+					
+				break;
+				case SDL_MOUSEBUTTONDOWN: dragging = TRUE;         break;
+				case SDL_MOUSEBUTTONUP  : 
+				
+					dragging = FALSE;
+					glrf_x = 0.0f;
+					glrf_y = 0.0f;
+				
+				break;
+				case SDL_QUIT           : systemFinished = FINISH; break;
 			
 			}
 			
