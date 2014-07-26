@@ -30,15 +30,12 @@
 
 #include "newtonian.h"
 
-<<<<<<< HEAD
 long double G_force_massMass(long double mass1, long double mass2, long double radius) {
 	
 	return ( GRAVITATIONAL_CONSTANT * mass1 * mass2 ) / ( radius * radius );
 	
 }
 
-=======
->>>>>>> 3505bf6e66286cc7d964b0bf5e4c0891f3afe216
 long double momentum_massVelocity(long double M , long double V) {
 	
 	return M * V;
