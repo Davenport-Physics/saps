@@ -29,9 +29,6 @@
 
 #include "engine.h"
 
-#define SLICES 30.f
-
-
 void draw_default_flat_plane();
 void draw_random_ball();
 
@@ -43,6 +40,8 @@ void drawSphere(double r, int lats, int longs);
 static float *coscalc;
 static float *sincalc;
 
+static float SLICES = 30.f;
+
 //glTranslatef variables
 static float glTf_x, glTf_y, glTf_z;
 
@@ -50,6 +49,20 @@ SDL_Window* Window;
 
 int engine_init() {
 	
+	
+	/*
+	 * {@
+	 * 
+	 * Algorithm which can be found in the drawCircle function.
+	 * 
+	 * Initializing the cosine and sin values to an array, mitigates
+	 * the issue with calling sin and cos during every frame that a
+	 * circle is drawn.
+	 * 
+	 * There is a slight issue with this algorithm however, as circle
+	 * are not drawn. Slight bug.
+	 * 
+	 * */
 	float degrees = (360 / SLICES);
 	float current = 0;
 	
@@ -66,6 +79,11 @@ int engine_init() {
 	}
 	coscalc[(int)SLICES] = cos(0);
 	sincalc[(int)SLICES] = sin(0);
+	
+	/*
+	 * @}
+	 * 
+	 * */
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	
@@ -198,6 +216,13 @@ void drawCircle(float radius, float triangles) {
 	glEnd();
 	
 }
+
+/*
+ * drawCircle_v2 uses the initialized array variables coscalc and sincalc
+ * to avoid having to call cos and sin during every frame that a circle
+ * is drawn.
+ * 
+ * */
 void drawCircle_v2(float radius) {
 	
 	int x;
@@ -230,6 +255,7 @@ void draw_default_flat_plane() {
 	glEnd();
 	
 }
+
  void drawSphere(double r, int lats, int longs) {
 	 
     int i, j;

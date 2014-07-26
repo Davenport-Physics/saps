@@ -51,10 +51,7 @@ int main(int argc, char **argv)
 	pthread_t secondary;
 	pthread_t event;
 	
-	int *types        = NULL;	
 	char command[100] = {'\0'};
-	
-	struct enginevars var;
 	
 	hold.tv_sec  = 0;
 	hold.tv_nsec = 100000000;
@@ -80,11 +77,17 @@ int main(int argc, char **argv)
 		
 	}
 	
+	struct enginevars var;
+	
 	/*
+	 * *types is a arbitrary length variable that tells the engine which
+	 * functions to call, in order to render the correct simulation.
+	 * 
 	 * typeLength is used by the engine, as a reference to how many
 	 * rendering jobs it has to do per frame.
 	 * 
 	 * */
+	int *types        = NULL;	
 	int typeLength;
 	while (1) {
 		
@@ -145,7 +148,9 @@ int main(int argc, char **argv)
 			printf("That is not a correct type of operation\n");
 			
 		}
+		
 		free( types );
+		
 	}	
 	
 	return 0;
@@ -160,11 +165,20 @@ void *constructor(void *n) {
 	
 	struct enginevars *vars = (struct enginevars *)n;
 	
-	//Holds the Index value of the current particle
+	/*
+	 * Holds index values, type of particle, mass of particle and charge
+	 * of particle.
+	 * */
 	struct particle_attributes *electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
 	struct particle_attributes *protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
 	
-	//systemFinished is the variable each thread look at to keep them running.
+	/*
+	 * systemFinished is a variable that each thread look at to keep them
+	 * running. systemFinished is either CONTINUE or FINISH.
+	 * 
+	 * Global variable defined and declared in systemtime.c/.h
+	 * 
+	 * */
 	systemFinished = CONTINUE;
 	init_particles(numElectron, numProton);
 	
