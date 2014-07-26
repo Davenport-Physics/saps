@@ -51,8 +51,8 @@ int main(int argc, char **argv)
 	pthread_t secondary;
 	pthread_t event;
 	
-	int types[3];	
-	char type[100] = {'\0'};
+	int *types        = NULL;	
+	char command[100] = {'\0'};
 	
 	struct enginevars var;
 	
@@ -80,21 +80,28 @@ int main(int argc, char **argv)
 		
 	}
 	
+	/*
+	 * typeLength is used by the engine, as a reference to how many
+	 * rendering jobs it has to do per frame.
+	 * 
+	 * */
+	int typeLength;
 	while (1) {
 		
 		var.readyElectron = 0;
 		var.readyProton   = 0;
 		
-		types[0] = 0;
-		types[1] = 0;
-		types[2] = 0;
+		typeLength = 0;
 	
 		printf("Type: ");
-		scanf("%s", type);
+		scanf("%s", command);
 	
-		if (strcmp( type , "particles" ) == 0) {
+		if (strcmp( command , "particles" ) == 0) {
 			
-			types[0] = 1;
+			types = ( int * )malloc( sizeof( int ) );
+			
+			types[0]   = 1;
+			typeLength = 1;
 		
 			printf("Number of electrons: ");
 			scanf("%d" , &numElectron);
@@ -104,21 +111,31 @@ int main(int argc, char **argv)
 			engine_init();
 			pthread_create(&secondary, NULL, constructor, (void *)&var);
 			pthread_create( &event, NULL, engine_event, ( void *)0);
-			engine_run( &var , types , runtime);
+			engine_run( &var , types , typeLength , runtime);
 	
 			pthread_join(event, NULL);
 			pthread_join(secondary, NULL);
 			engine_quit();
 		
-		} else if ( strcmp( type , "ball" ) == 0 ) {
+		} else if ( strcmp( command , "ball" ) == 0 ) {
+			
+			types = ( int * )malloc( sizeof( int ) );
 		
-			//engine_run();
+			types[0]   = 2;
+			typeLength = 1;
+			
+			engine_init();
+			pthread_create(&event , NULL, engine_event, (void *)0);
+			engine_run(&var , types , typeLength , runtime);
+			
+			pthread_join(event, NULL);
+			engine_quit();
 	
-		} else if ( strcmp( type , "quit" ) == 0 ) {
+		} else if ( strcmp( command , "quit" ) == 0 ) {
 			
 			break;
 			
-		} else if ( strcmp(type , "help") == 0) {
+		} else if ( strcmp( command , "help") == 0) {
 			
 			puts("\nparticles			Initiates particle simulation\n"
 				 "quit				Quits the program\n");
@@ -128,7 +145,7 @@ int main(int argc, char **argv)
 			printf("That is not a correct type of operation\n");
 			
 		}
-		
+		free( types );
 	}	
 	
 	return 0;

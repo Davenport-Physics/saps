@@ -33,13 +33,14 @@
 
 #include <malloc.h>
 
-struct attributes *hydrogen;
 struct attributes {
 	
 	int numElectrons, numProtons, numNeutron;
 	double amu;
 	
 };
+
+extern struct attributes *hydrogen;
 
 void initialize_elements(int , int);
 
