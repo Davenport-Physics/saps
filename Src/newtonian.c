@@ -24,49 +24,55 @@
 
 #include "newtonian.h"
 
-inline long double momentum_massVelocity(long double M , long double V) {
+long double G_force_massMass(long double mass1, long double mass2, long double radius) {
+	
+	return ( GRAVITATIONAL_CONSTANT * mass1 * mass2 ) / ( radius * radius );
+	
+}
+
+long double momentum_massVelocity(long double M , long double V) {
 	
 	return M * V;
 	
 }
 
-inline long double velocity_accelerationTime( long double A , long double T) {
+long double velocity_accelerationTime( long double A , long double T) {
 	
 	return A * T;
 
 }
 
-inline long double force_massAcceleration(long double M , long double A) {
+long double force_massAcceleration(long double M , long double A) {
 	
 	return M * A;
 	
 }
 
-inline long double mass_forceAcceleration( long double F , long double A ) {
+long double mass_forceAcceleration( long double F , long double A ) {
 	
 	return F / A;
 
 }
 
-inline long double acceleration_forceMass( long double F , long double M ) {
+long double acceleration_forceMass( long double F , long double M ) {
 	
 	return F / M;
 
 }
 
-inline long double metres_velocityTime( long double V , long double T ) {
+long double metres_velocityTime( long double V , long double T ) {
 	
 	return V * T;
 	
 }
 
-inline long double velocity_metresTime( long double M , long double T ) {
+long double velocity_metresTime( long double M , long double T ) {
 	
 	return M / T;
 
 }
 
-inline long double time_velocityMetres( long double V , long double M ) {
+long double time_velocityMetres( long double V , long double M ) {
 	
 	return V / M;
 

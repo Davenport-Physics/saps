@@ -16,7 +16,7 @@ particles.o : particles.h particles.c constants.h newtonian.h electric.h systemt
 constants.o : constants.h constants.c
 	$(CC) $(CFLAGS) constants.c
 
-newtonian.o : newtonian.h newtonian.c
+newtonian.o : newtonian.h newtonian.c constants.h
 	$(CC) $(CFLAGS) newtonian.c
 
 elements.o : elements.h elements.c

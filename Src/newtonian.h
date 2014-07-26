@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "constants.h"
+
 #define XY 0
 #define YZ 1
 
@@ -46,17 +48,18 @@ struct movement {
 
 };
 
+long double G_force_massMass(long double , long double, long double);
 
-inline long double momentum_massVelocity( long double  , long double );
-inline long double velocity_accelerationTime( long double , long double );
+long double momentum_massVelocity( long double  , long double );
+long double velocity_accelerationTime( long double , long double );
 
-inline long double force_massAcceleration( long double ,long double );
-inline long double mass_forceAcceleration( long double , long double );
-inline long double acceleration_forceMass( long double , long double );
+long double force_massAcceleration( long double ,long double );
+long double mass_forceAcceleration( long double , long double );
+long double acceleration_forceMass( long double , long double );
 
-inline long double metres_velocityTime( long double , long double );
-inline long double velocity_metresTime( long double , long double );
-inline long double time_velocityMetres( long double , long double );
+long double metres_velocityTime( long double , long double );
+long double velocity_metresTime( long double , long double );
+long double time_velocityMetres( long double , long double );
 
 void boundary(struct movement *current, int type);
 
