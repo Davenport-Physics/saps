@@ -29,6 +29,11 @@
 
 #include "mechanics.h"
 
+/*
+ * This function determines where a particle should be, with respect
+ * to the three dimensional boundary.
+ * 
+ * */
 long double new_position(long double currentPosition , long double expectedDisplacement , long double radius ) {
 	
 	if ( (currentPosition + expectedDisplacement) >= 1 ) {

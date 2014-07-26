@@ -54,7 +54,7 @@ struct enginevars {
 };
 
 int engine_init();
-void engine_run(struct enginevars *vars, int *types, enum engine_runtime runtime);
+void engine_run(struct enginevars *vars, int *types, int typeLength , enum engine_runtime runtime);
 void engine_quit();
 
 void *engine_event(void *n);

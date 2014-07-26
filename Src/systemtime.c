@@ -29,8 +29,18 @@
 
 #include "systemtime.h"
 
+int systemFinished;
+
 static long double systemTime;
 
+
+/*
+ * This will probably be replaced by another function that is much more
+ * efficient and accurate. However for the moment, this clock is used to
+ * determine the velocity of a particle with respect to acceleration and 
+ * any displacement.
+ * 
+ * */
 void *system_clock( void *n ) {
 	
 	systemTime = 0.00000000000000000000;

@@ -29,7 +29,8 @@
 
 #include "engine.h"
 
-#define SLICES 30.f
+void draw_default_flat_plane();
+void draw_random_ball();
 
 void drawParticles( int *readyElectron , int *readyProton );
 void drawCircle(float radius, float triangles);
@@ -39,10 +40,29 @@ void drawSphere(double r, int lats, int longs);
 static float *coscalc;
 static float *sincalc;
 
+static float SLICES = 30.f;
+
+//glTranslatef variables
+static float glTf_x, glTf_y, glTf_z;
+
 SDL_Window* Window;
 
 int engine_init() {
 	
+	
+	/*
+	 * {@
+	 * 
+	 * Algorithm which can be found in the drawCircle function.
+	 * 
+	 * Initializing the cosine and sin values to an array, mitigates
+	 * the issue with calling sin and cos during every frame that a
+	 * circle is drawn.
+	 * 
+	 * There is a slight issue with this algorithm however, as circle
+	 * are not drawn. Slight bug.
+	 * 
+	 * */
 	float degrees = (360 / SLICES);
 	float current = 0;
 	
@@ -59,6 +79,11 @@ int engine_init() {
 	}
 	coscalc[(int)SLICES] = cos(0);
 	sincalc[(int)SLICES] = sin(0);
+	
+	/*
+	 * @}
+	 * 
+	 * */
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	
@@ -86,13 +111,17 @@ void engine_quit() {
 	
 }
 
-void engine_run(struct enginevars *vars, int *types, enum engine_runtime runtime) {
+void engine_run(struct enginevars *vars, int *types, int typeLength , enum engine_runtime runtime) {
 	
 	int x;
 	
 	struct timespec hold;
 	hold.tv_sec = 0;
 	hold.tv_nsec = 1666666;
+	
+	glTf_x = 0.0f;
+	glTf_y = 0.0f;
+	glTf_z = 0.0f;
 	
 	SDL_GLContext glcontext = SDL_GL_CreateContext(Window);
 	
@@ -106,11 +135,12 @@ void engine_run(struct enginevars *vars, int *types, enum engine_runtime runtime
 			glClear(GL_COLOR_BUFFER_BIT);
 			glLoadIdentity();
 		
-			for ( x = 0; x < 3; x++ ) {
+			for ( x = 0; x < typeLength; x++ ) {
 		
 				switch (types[x]) {
 				
 					case 1: drawParticles( &vars->readyElectron , &vars->readyProton ); break;
+					case 2: draw_default_flat_plane(); break;
 			
 				}
 		
@@ -144,7 +174,7 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 		glPushMatrix();
 			
 			glColor3f( 0.0f,0.0f,0.0f );
-			glTranslatef( electronLocations[x].x , electronLocations[x].y , electronLocations[x].z);
+			glTranslatef( electronLocations[x].x + glTf_x, electronLocations[x].y + glTf_y , electronLocations[x].z + glTf_z);
 			//drawCircle( electronLocations[x].radius, 30);
 			drawCircle_v2(electronLocations[x].radius);
 	
@@ -186,6 +216,13 @@ void drawCircle(float radius, float triangles) {
 	glEnd();
 	
 }
+
+/*
+ * drawCircle_v2 uses the initialized array variables coscalc and sincalc
+ * to avoid having to call cos and sin during every frame that a circle
+ * is drawn.
+ * 
+ * */
 void drawCircle_v2(float radius) {
 	
 	int x;
@@ -203,6 +240,22 @@ void drawCircle_v2(float radius) {
 	glEnd();
 
 }
+void draw_default_flat_plane() {
+	
+	glBegin(GL_QUADS);
+	
+		glColor3f(0.1f, 0.9f , 0.1f);
+		glTranslatef( 1.0f + glTf_x , 1.0f + glTf_y , 1.0f + glTf_z);
+		
+		glVertex3f( 0.0f , 0.0f , 0.0f );
+		glVertex3f( 0.0f , 1.0f , 0.0f );
+		glVertex3f( 1.0f , 1.0f , 0.0f );
+		glVertex3f( 1.0f , 0.0f , 0.0f );
+	
+	glEnd();
+	
+}
+
  void drawSphere(double r, int lats, int longs) {
 	 
     int i, j;
@@ -240,24 +293,33 @@ void drawCircle_v2(float radius) {
 
 void *engine_event(void *n) {
 	
+	float speed = 0.05f;
+	
 	SDL_Event event;
 	
 	while ( systemFinished == CONTINUE ) {
 		
 		while ( SDL_PollEvent( &event ) ) {
 			
-			if (event.type == SDL_KEYDOWN) {
-			
-				if (event.key.keysym.sym == 'q') {
+			switch (event.type) {
 				
-					systemFinished = FINISH;
+				case SDL_KEYDOWN:
+				
+					switch(event.key.keysym.sym) {
+						
+						case 'q'       : systemFinished = FINISH; break;
+						case SDLK_UP   : glTf_y += speed;         break;
+						case SDLK_DOWN : glTf_y -= speed;         break;
+						case SDLK_RIGHT: glTf_x += speed;         break;
+						case SDLK_LEFT : glTf_x -= speed;         break;
 					
-				}
+					}
+					
+				break;
 				
-			} else if (event.type == SDL_QUIT) {
-				
-				systemFinished = FINISH;
-				
+				case SDL_QUIT: systemFinished = FINISH; break;
+			
+			
 			}
 			
 		}

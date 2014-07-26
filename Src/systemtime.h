@@ -37,7 +37,7 @@
 #define CONTINUE 0
 #define FINISH 1
 
-int systemFinished;
+extern int systemFinished;
 
 void *system_clock( void *n );
 long double get_system_time();

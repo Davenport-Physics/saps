@@ -33,6 +33,8 @@
 #define HYDROGEN 0
 #define HELIUM 1
 
+struct attributes *hydrogen;
+
 void initialize_elements(int element, int num) {
 	
 	int x;
@@ -57,5 +59,10 @@ void initialize_elements(int element, int num) {
 		
 	}
 	
+	
+}
+void quit_elements() {
+	
+	free(hydrogen);
 	
 }

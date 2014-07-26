@@ -29,17 +29,10 @@
 
 #include "particles.h"
 
-enum {
-	EL_EL = 0,
-	EL_PR,
-	PR_PR,
-	PR_EL
-	
-};
 
 /*
  * 
- * int type allows certain portions of the code to know what the particle
+ * Allows certain portions of the code to know what the particle
  * is interacting with.
  * 
  * Interactions
@@ -50,6 +43,14 @@ enum {
  * 3 - Proton/Electron
  * 
  * */
+enum {
+	EL_EL = 0,
+	EL_PR,
+	PR_PR,
+	PR_EL
+	
+};
+
 pthread_mutex_t ready;
 
 //extern variables
@@ -73,6 +74,7 @@ void calculate_acceleration( long double mass , struct movement *this );
 void calculate_velocity( int index1, int index2 , long double time , struct movement *this );
 void calculate_displacement( int index1 , int index2 , long double time , struct movement *this);
 void calculate_components( long double x , long double y , long double z , struct movement *this , int type );
+
 
 void init_particles(int numElectron, int numProton) {
 	
