@@ -38,7 +38,7 @@
 #include "engine.h"
 #include "systemtime.h"
 
-void *constructor(void *n);
+void *particle_constructor(void *n);
 
 static struct timespec hold;
 
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 			scanf("%d", &numProton);
 	
 			engine_init();
-			pthread_create(&secondary, NULL, constructor, (void *)&var);
+			pthread_create(&secondary, NULL, particle_constructor, (void *)&var);
 			pthread_create( &event, NULL, engine_event, ( void *)0);
 			engine_run( &var , types , typeLength , runtime);
 	
@@ -155,9 +155,11 @@ int main(int argc, char **argv)
 	
 	return 0;
 }
-void *constructor(void *n) {
+void *particle_constructor(void *n) {
 	
-	int x;
+	int x, y;
+	
+	int particle = TRUE;
 	
 	pthread_t electronThread[numElectron];
 	pthread_t protonThread[numProton];
@@ -169,8 +171,8 @@ void *constructor(void *n) {
 	 * Holds index values, type of particle, mass of particle and charge
 	 * of particle.
 	 * */
-	struct particle_attributes *electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
-	struct particle_attributes *protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
+	struct particle_attributes *electronAttributes;
+	struct particle_attributes *protonAttributes;
 	
 	/*
 	 * systemFinished is a variable that each thread look at to keep them
@@ -180,63 +182,94 @@ void *constructor(void *n) {
 	 * 
 	 * */
 	systemFinished = CONTINUE;
-	init_particles(numElectron, numProton);
 	
 	pthread_create( &systemThread, NULL, system_clock, ( void *)0 );
-	for (x = 0; x < numElectron; x++) {
+	
+	if (particle == TRUE) {
 		
-		electronAttributes[x].index  = x;
-		electronAttributes[x].type   = ELECTRON;
-		electronAttributes[x].mass   = ELECTRON_MASS;
-		electronAttributes[x].charge = ELECTRON_CHARGE; 
-		electronLocations[x].done    = 0;
-		pthread_create( &electronThread[x], NULL, particles , (void *)&electronAttributes[x] );
+		init_particles(numElectron, numProton);
 		
-		while (electronLocations[x].done != 1 ) {
+		electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
+		protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
+		
+		int numParticle   = numElectron;
+		int *readyParticle = &vars->readyElectron;
+		
+		struct location *thisLocation              = electronLocations;
+		struct particle_attributes *thisAttributes = electronAttributes;	
+		
+		int type = ELECTRON;
+		
+		long double mass   = ELECTRON_MASS;
+		long double charge = ELECTRON_CHARGE;
+		
+		pthread_t *thisThread = electronThread;
+
+		for (y = 0; y < 2; y++) {
 			
-			nanosleep( &hold , NULL );
+			for (x = 0; x < numParticle; x++) {
 		
-		}
-		vars->readyElectron += 1;
-	
-	}
-	for (x = 0;x < numProton; x++) {
+				thisAttributes[x].index  = x;
+				thisAttributes[x].type   = type;
+				thisAttributes[x].mass   = mass;
+				thisAttributes[x].charge = charge; 
+				thisLocation[x].done     = 0;
+				pthread_create( &thisThread[x], NULL, particles , (void *)&thisAttributes[x] );
 		
-		protonAttributes[x].index  = x;
-		protonAttributes[x].type   = PROTON;
-		protonAttributes[x].mass   = PROTON_MASS;
-		protonAttributes[x].charge = PROTON_CHARGE;
-		protonLocations[x].done    = 0;
-		pthread_create( &protonThread[x], NULL , particles , (void *)&protonAttributes[x] );
-		
-		while (protonLocations[x].done != 1 ) {
+				while (electronLocations[x].done != 1 ) {
 			
-			nanosleep( &hold , NULL );
+					nanosleep( &hold , NULL );
 		
+				}
+				*readyParticle += 1;
+	
+			}
+			
+			numParticle    = numProton;
+			readyParticle  = &vars->readyProton;
+			thisLocation   = protonLocations;
+			thisAttributes = protonAttributes;
+			
+			mass   = PROTON_MASS;
+			charge = PROTON_CHARGE;
+			
+			thisThread = protonThread;
+			
 		}
-		vars->readyProton += 1;
-	
-	}
-	
-	for (x = 0;x < numElectron;x++) {
-		
-		pthread_join(electronThread[x], NULL);
-	
-	}
-	for (x = 0;x < numProton;x++) {
-	
-		pthread_join(protonThread[x], NULL);
 		
 	}
+	
+	if (particle == TRUE) {
+	
+		int numParticle = numElectron;
+		
+		pthread_t *thisThread = electronThread;
+		
+		for (y = 0; y < 2; y++) {
+			
+			for (x = 0; x < numParticle;x++) {
+			
+				pthread_join( thisThread[x] , NULL );
+		
+			}
+			
+			numParticle = numProton;
+			
+			thisThread = protonThread;
+			
+		}
+		
+		quit_particles();
+		
+		free( electronAttributes );
+		free( protonAttributes );
+	
+		electronAttributes	  = NULL;
+		protonAttributes	  = NULL;
+		
+	}
+	
 	pthread_join( systemThread, NULL );
-	quit_particles();
-	
-	
-	free( electronAttributes );
-	free( protonAttributes );
-	
-	electronAttributes	  = NULL;
-	protonAttributes	  = NULL;
 	
 	pthread_exit(EXIT_SUCCESS);
 	

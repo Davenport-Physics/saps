@@ -46,6 +46,13 @@ enum engine_runtime {
 	
 };
 
+enum {
+	
+	FALSE = 0,
+	TRUE
+	
+};
+
 struct enginevars {
 	
 	int readyElectron;
