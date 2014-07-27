@@ -317,7 +317,7 @@ void compare_locations( int index, struct location *thisParticle ) {
 		
 }
 
-struct location *this_that(int type, int count) {
+__attribute__((hot)) struct location *this_that(int type, int count) {
 	
 	switch (type) {
 	
