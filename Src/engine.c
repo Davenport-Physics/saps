@@ -171,6 +171,7 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 			nanosleep( &hold , NULL );
 		
 		}
+		
 	} else {
 	
 		while (systemFinished == 0) {
@@ -340,37 +341,37 @@ void *engine_event(void *n) {
 					
 				break;
 				
-				case SDL_MOUSEMOTION    :
+				case SDL_MOUSEMOTION:
 				
 					if (dragging == TRUE) {
 					
 						if (event.motion.xrel > 0) {
 							
 							glrf_x = 1;
-							angle += 10*(event.motion.xrel);
+							angle += 10 * (event.motion.xrel);
 							
 						} else if (event.motion.xrel < 0) {
 							
 							glrf_x = -1;
-							angle += 10*(event.motion.xrel);
+							angle += 10 * (event.motion.xrel);
 						
 						}
 						
 						if (event.motion.yrel > 0) {
 						
 							glrf_y = 1;
-							angle += 10*(event.motion.yrel);
+							angle += 10 * (event.motion.yrel);
 						
 						} else if (event.motion.yrel < 0) {
 							
 							glrf_y = -1;
-							angle += 10*(event.motion.yrel);
+							angle += 10 * (event.motion.yrel);
 						}
 						
 					}
 					
 				break;
-				case SDL_MOUSEBUTTONDOWN: dragging = TRUE;         break;
+				case SDL_MOUSEBUTTONDOWN: dragging = TRUE; break;
 				case SDL_MOUSEBUTTONUP  : 
 				
 					dragging = FALSE;
@@ -378,7 +379,7 @@ void *engine_event(void *n) {
 					glrf_y = 0.0f;
 				
 				break;
-				case SDL_QUIT           : systemFinished = FINISH; break;
+				case SDL_QUIT: systemFinished = FINISH; break;
 			
 			}
 			
