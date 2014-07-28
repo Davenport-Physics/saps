@@ -37,13 +37,6 @@ void drawCircle(float radius, float triangles);
 void drawCircle_v2(float radius);
 void drawSphere(double r, int lats, int longs);
 
-enum {
-
-	FALSE = 0,
-	TRUE
-	
-};
-
 static float *coscalc;
 static float *sincalc;
 
@@ -249,16 +242,12 @@ void drawCircle_v2(float radius) {
 	
 	int x;
 	
-	glBegin(GL_TRIANGLES);
-	
+	glBegin(GL_POLYGON);
 	for ( x = 0; x < (int)SLICES; x++ ) {
 		
 		glVertex3f(radius * coscalc[x] , radius * sincalc[x] , 0.0f);
-		glVertex3f( radius * coscalc[(x+1)] , radius * sincalc[x] , 0.0f );
-		glVertex3f( 0.0f , 0.0f , 0.0f );
-	
+		
 	}
-	
 	glEnd();
 
 }
