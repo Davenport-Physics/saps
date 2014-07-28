@@ -65,18 +65,15 @@ inline float get_float();
 
 void get_random_location(int index, struct location *thisParticle);
 void compare_locations(int index, struct location *thisParticle);
-void calculate_summation_force(int index,double thisCharge, struct movement *this, struct location * thisParticle);
-struct location *this_that(int type, int count );
+void calculate_summation_force(int index, double thisCharge , struct movement *this , struct location * thisParticle);
+
+void check_system();	 
+void calculate_force( int index1 , int index2 , struct movement *this );
+void calculate_acceleration( double mass , struct movement *this);
+void calculate_velocity( double time , struct movement *this );
+void calculate_displacement( double time , struct movement *this);
 
 double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle);
-
-void check_system();
-void calculate_difference( int index1 , int index2 , double *x , double *y , double *z , int type );		 
-void calculate_force( int index1 , int index2 , struct movement *this );
-void calculate_acceleration( long double mass , struct movement *this);
-void calculate_velocity( int index1, int index2 , double time , struct movement *this );
-void calculate_displacement( int index1 , int index2 , double time , struct movement *this);
-void calculate_components( double x , double y , double z , struct movement *this , int type );
 
 
 void init_particles(int numElectron, int numProton) {
@@ -126,9 +123,10 @@ void *particles(void *att) {
 	}
 	
 	const int index = attr->index;
-	const int type  = attr->type;
+	//const int type  = attr->type;
 	
-	const long double mass   = attr->mass;
+	const double mass   = attr->mass;
+	const double charge = attr->charge;
 	
 	get_random_location( index , thisParticle);
 	compare_locations( index , thisParticle );
@@ -147,79 +145,16 @@ void *particles(void *att) {
 	long double time = get_system_time();
 	long double initialTime = time;
 	
-	int x;
 	long double temp;
 	
-	int amountParticle;
 	while (systemFinished == CONTINUE) {
 		
-		amountParticle = 0;
+		calculate_summation_force( index , charge , &current , thisParticle );
+		calculate_acceleration( mass , &current );
+		calculate_velocity( initialTime - time , &current);
+		calculate_displacement( initialTime - time , &current );
 		
-		switch (type) {
 		
-			case ELECTRON: 
-			
-				current.type = EL_EL;
-				amountParticle = numParticles->amountElectron;
-			
-			break;
-			case PROTON  : 
-			
-				current.type = PR_PR;
-				amountParticle = numParticles->amountProton;
-			
-			break;  
-			
-		}
-		for (x = 0; x < amountParticle; x++) {
-			
-			if ( index == x ) {
-			
-				continue;
-				
-			} else {
-			
-				calculate_force( index, x , &current );
-				calculate_acceleration( mass , &current );
-				calculate_velocity( index , x ,  time - initialTime , &current );					
-				calculate_displacement( index , x , time - initialTime , &current );
-			
-			}
-		
-		}
-		amountParticle = 0;
-		switch (type) {
-		
-			case ELECTRON: 
-			
-				current.type = EL_PR;
-				amountParticle = numParticles->amountProton;
-			
-			break;
-			case PROTON  : 
-			
-				current.type = PR_EL;
-				amountParticle = numParticles->amountElectron;
-			
-			break;  
-			
-		}
-		for (x = 0; x < amountParticle; x++) {
-			
-			if ( index == x ) {
-			
-				continue;
-				
-			} else {
-			
-				calculate_force( index, x , &current );
-				calculate_acceleration( mass , &current );
-				calculate_velocity( index , x ,  time - initialTime , &current );					
-				calculate_displacement( index , x , time - initialTime , &current );
-			
-			}
-		
-		}
 		
 		temp = new_position(thisParticle[index].x , current.displacementX , thisParticle[index].radius);
 		if ( current.displacementX != temp ) {
@@ -320,47 +255,8 @@ void compare_locations( int index, struct location *thisParticle ) {
 		
 }
 
-__attribute__((hot)) struct location *this_that(int type, int count) {
-	
-	switch (type) {
-	
-		case EL_EL:
-		
-			return electronLocations;
-		
-		break;
-		
-		case EL_PR:
-		
-			if (count == 0)
-				return electronLocations;
-			else
-				return protonLocations;
-			
-			
-		break;
-		
-		case PR_PR:
-		
-			return protonLocations;
-			
-		break;
-		
-		case PR_EL:
-		
-			if (count == 0)
-				return protonLocations;
-			else
-				return electronLocations;
-			
-		break;
-		default: return NULL; break;
-		
-	}
-	
-}
 
-inline float get_float() {
+float get_float() {
 	
 	return ( float )rand()/( float )RAND_MAX;
 
@@ -377,62 +273,18 @@ void check_system() {
 	
 }
 
-void calculate_difference( int index1 , int index2 , double *x , double *y , double *z , int type ) {
-	
-	
-	struct location *thisParticle = this_that(type , 0);
-	struct location *thatParticle = this_that(type , 1);
-	
-	*x = thisParticle[index1].x - thatParticle[index2].x;
-	*y = thisParticle[index1].y - thatParticle[index2].y;
-	*z = thisParticle[index1].z - thatParticle[index2].z;
-
-}
-
-void calculate_force( int index1 , int index2 ,  struct movement *this ) {
-	
-	
-	//Because interaction at the nano level is too quickly to see.
-	double scale = 50;
-	
-	double x , y , z;
-	double distance;
-	
-	double first, second;
-	
-	
-	calculate_difference( index1 , index2 , &x , &y , &z , this->type );
-		
-	distance = sqrtl( ( x * x ) + ( y * y ) + ( z * z ) );
-	
-	switch ( this->type ) {
-		
-		case PR_PR:
-		case EL_EL: first = ELECTRON_CHARGE; second = ELECTRON_CHARGE; break;
-		
-		case PR_EL:
-		case EL_PR: first = ELECTRON_CHARGE; second = PROTON_CHARGE; break;
-		
-		default   : first = 0; second = 0; break;
-	
-	
-	}
-	this->force += force_kqqR2( first , second , 
-										distance * scale ) - this->force;
-
-}
 void calculate_summation_force(int index, double thisCharge, struct movement *this, struct location *thisParticle) {
 	
 	int a, b;
 	
 	int num       = numParticles->amountElectron;
 	double charge = ELECTRON_CHARGE;
-	double sum    = 0;
 	
-	
-	double distance;
+	double sumx = 0, sumy = 0, sumz = 0;
 	
 	struct location *thatParticle = electronLocations;
+	
+	const double kq = COULOMBS_CONSTANT * thisCharge;
 	
 	for (a = 0; a < 2;a++) {
 		
@@ -444,8 +296,9 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 				
 			} else {
 				
-				distance = calculate_distance(index, b, thisParticle, thatParticle);
-				sum -= summation_electric_field( charge , distance);
+				sumx += summation_electric_field( charge , thisParticle[index].x - thatParticle[b].x);
+				sumy += summation_electric_field( charge , thisParticle[index].y - thatParticle[b].y);
+				sumz += summation_electric_field( charge , thisParticle[index].z - thatParticle[b].z);
 				
 			}
 			
@@ -455,7 +308,10 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 		thatParticle = protonLocations;
 	
 	}
-	this->force = sum * COULOMBS_CONSTANT * thisCharge;
+	this->force  = kq * sqrt( (sumx * sumx) + (sumy * sumy) + (sumz * sumz));
+	this->forceX = kq * sumx;
+	this->forceY = kq * sumy;
+	this->forceZ = kq * sumz;
 	
 
 }
@@ -469,161 +325,29 @@ double calculate_distance(int index, int index2, struct location *thisParticle, 
 
 }
 
-void calculate_acceleration( long double mass , struct movement *this ) {
+void calculate_acceleration( double mass , struct movement *this ) {
 	
-	this->acceleration += acceleration_forceMass( this->force , mass ) - this->acceleration;
+	this->acceleration  += acceleration_forceMass( this->force , mass ) - this->acceleration;
+	this->accelerationX += acceleration_forceMass( this->forceX , mass ) - this->accelerationX;
+	this->accelerationY += acceleration_forceMass( this->forceY , mass ) - this->accelerationY;
+	this->accelerationZ += acceleration_forceMass( this->forceZ , mass ) - this->accelerationZ;
+	
 
 }
-void calculate_velocity( int index1 , int index2 , double time , struct movement *this ) {
+void calculate_velocity( double time , struct movement *this ) {
 	
-	double x , y , z;
-	
-	calculate_difference( index1 , index2 , &x , &y , &z , this->type );
-	
-	this->velocity += velocity_accelerationTime( this->acceleration, time ) - this->velocity;
-	
-	calculate_components( x , y , z , this , VELOCITY);
+	this->velocity  += velocity_accelerationTime( this->acceleration , time ) - this->velocity;
+	this->velocityX += velocity_accelerationTime( this->accelerationX , time ) - this->velocityX;
+	this->velocityY += velocity_accelerationTime( this->accelerationY , time ) - this->velocityY;
+	this->velocityZ += velocity_accelerationTime( this->accelerationZ , time ) - this->velocityZ;
 	
 }
 
-void calculate_displacement( int index1 , int index2 , double time , struct movement *this ) {
+void calculate_displacement( double time , struct movement *this ) {
 	
-	long double scale = 1;
-	
-	struct location *thisParticle = this_that( this->type , 0 );
-	struct location *thatParticle = this_that( this->type , 1 );
-	
-	switch ( this->type ) {
-		
-		case PR_PR:
-		case EL_EL:
-		
-			if ( thisParticle[index1].x > thatParticle[index2].x && thisParticle[index1].x < 1.0) {
-			
-				this->displacementX += ( metres_velocityTime( this->velocityX , time ) / scale );
-		
-			} else if ( thisParticle[index1].x == thatParticle[index2].x ) {
-			
-			
-		
-			} else {
-			
-				this->displacementX -=  ( metres_velocityTime( this->velocityX , time ) / scale );
-		
-			}
-		
-			if ( thisParticle[index1].y > thatParticle[index2].y && thisParticle[index1].y < 1.0 ) {
-			
-				this->displacementY += ( metres_velocityTime( this->velocityY , time ) / scale );
-		
-			} else if ( thisParticle[index1].y == thatParticle[index2].y ) {
-			
-				
-		
-			} else {
-			
-				this->displacementY -= ( metres_velocityTime( this->velocityY , time ) / scale );
-				
-			}
-		
-			if (thisParticle[index1].z > thatParticle[index2].z && thisParticle[index1].z < 1.0 ) {
-			
-				this->displacementZ += ( metres_velocityTime( this->velocityZ , time ) / scale );
-		
-			} else if ( thisParticle[index1].z == thatParticle[index2].z ) {
-			
-			
-		
-			} else {
-			
-				this->displacementZ -= ( metres_velocityTime( this->velocityZ , time ) / scale );
-			
-			}
-			
-		break;
-		
-		case PR_EL:
-		case EL_PR:
-		
-			if ( thisParticle[index1].x > thatParticle[index2].x && thisParticle[index1].x > -1.0 ) {
-				
-				this->displacementX += ( metres_velocityTime( this->velocityX , time ) );
-			
-			} else if ( thisParticle[index1].x == thatParticle[index2].x ) {
-				
-				
-				
-			} else {
-				
-				this->displacementX -= ( metres_velocityTime( this->velocityX , time ) );
-			
-			}
-			
-			if ( thisParticle[index1].y > thatParticle[index2].y && thisParticle[index1].y > -1.0 ) {
-				
-				this->displacementY += ( metres_velocityTime( this->velocityY , time ) );
-			
-			} else if ( thisParticle[index1].y == thatParticle[index2].y ) {
-				
-			
-				
-			} else {
-				
-				this->displacementY -= ( metres_velocityTime( this->velocityY , time ) );
-			
-			}
-			
-			if ( thisParticle[index1].z > thisParticle[index2].z && thisParticle[index1].z > -1.0 ) {
-				
-				this->displacementZ += ( metres_velocityTime( this->velocityZ , time ) );
-			
-			} else if ( thisParticle[index1].z == thisParticle[index2].z ) {
-				
-				
-			
-			} else {
-				
-				this->displacementZ -= ( metres_velocityTime( this->velocityZ , time ) );
-			
-			}
-		
-		break;
-		
-	}
+	this->displacementX += metres_velocityTime( this->velocityX , time );
+	this->displacementY += metres_velocityTime( this->velocityY , time );
+	this->displacementZ += metres_velocityTime( this->velocityZ , time );
 	
 }
-void calculate_components( double x , double y , double z , struct movement *this , int type ) {
-	
-	long double xytheta = atan( y / x ), yztheta = atan( z / y );
-	
-	switch ( type ) {
-		
-		case FORCE: 
-		
-			this->forceX += ( this->force * cos( xytheta ) );
-			this->forceY += ( this->force * sin( xytheta ) );
-			this->forceZ += ( this->force * sin( yztheta ) );
-			 
-		break;
-		
-		case ACCELERATION:
-		
-			this->accelerationX += ( this->acceleration * cos( xytheta ) );
-			this->accelerationY += ( this->acceleration * sin( xytheta ) );
-			this->accelerationZ += ( this->acceleration * sin( yztheta ) );
-		
-		break;
-		
-		case VELOCITY:
-		
-			this->velocityX += ( this->velocity * cos( xytheta ) );
-			this->velocityY += ( this->velocity * sin( xytheta ) );
-			this->velocityZ += ( this->velocity * sin( yztheta ) );
-		
-		break;
-	
-	
-	} 
 
-
-}
