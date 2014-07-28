@@ -54,10 +54,10 @@ enum {
 pthread_mutex_t ready;
 
 //extern variables
-struct location *electronLocations;
-struct location *protonLocations;
-struct location *neutronLocations;
-struct amount   *numParticles;
+struct location *electronLocations = NULL;
+struct location *protonLocations   = NULL;
+struct location *neutronLocations  = NULL;
+struct amount   *numParticles      = NULL;
 
 static struct timespec hold;
 
@@ -113,7 +113,13 @@ void *particles(void *att) {
 	
 	struct location *thisParticle;
 	
-	switch (attr->type) {
+	const int index = attr->index;
+	const int type  = attr->type;
+	
+	const double mass   = attr->mass;
+	const double charge = attr->charge;
+	
+	switch (type) {
 	
 		case ELECTRON: thisParticle = electronLocations; break;
 		case PROTON  : thisParticle = protonLocations;   break;
@@ -121,12 +127,6 @@ void *particles(void *att) {
 		default: printf("No type specified\n"); pthread_exit(EXIT_SUCCESS); break;
 		
 	}
-	
-	const int index = attr->index;
-	//const int type  = attr->type;
-	
-	const double mass   = attr->mass;
-	const double charge = attr->charge;
 	
 	get_random_location( index , thisParticle);
 	compare_locations( index , thisParticle );
@@ -276,15 +276,15 @@ void check_system() {
 void calculate_summation_force(int index, double thisCharge, struct movement *this, struct location *thisParticle) {
 	
 	int a, b;
+	int num = numParticles->amountElectron;
 	
-	int num       = numParticles->amountElectron;
-	double charge = ELECTRON_CHARGE;
-	
-	double sumx = 0, sumy = 0, sumz = 0;
+	double charge      = ELECTRON_CHARGE;
+	double sumx        = 0, sumy = 0, sumz = 0;
+	const double kq    = COULOMBS_CONSTANT * thisCharge;
+	const double scale = 100000; //Used to decrease the amount of force felt by a particle.
 	
 	struct location *thatParticle = electronLocations;
 	
-	const double kq = COULOMBS_CONSTANT * thisCharge;
 	
 	for (a = 0; a < 2;a++) {
 		
@@ -309,9 +309,9 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 	
 	}
 	this->force  = kq * sqrt( (sumx * sumx) + (sumy * sumy) + (sumz * sumz));
-	this->forceX = kq * sumx;
-	this->forceY = kq * sumy;
-	this->forceZ = kq * sumz;
+	this->forceX = (kq * sumx)/scale;
+	this->forceY = (kq * sumy)/scale;
+	this->forceZ = (kq * sumz)/scale;
 	
 
 }

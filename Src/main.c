@@ -91,6 +91,9 @@ int main(int argc, char **argv)
 	int typeLength;
 	while (1) {
 		
+		numElectron = 0;
+		numProton   = 0;
+		
 		var.readyElectron = 0;
 		var.readyProton   = 0;
 		
@@ -192,7 +195,7 @@ void *particle_constructor(void *n) {
 		electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
 		protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
 		
-		int numParticle   = numElectron;
+		int numParticle    = numElectron;
 		int *readyParticle = &vars->readyElectron;
 		
 		struct location *thisLocation              = electronLocations;
@@ -230,6 +233,7 @@ void *particle_constructor(void *n) {
 			thisLocation   = protonLocations;
 			thisAttributes = protonAttributes;
 			
+			type   = PROTON;
 			mass   = PROTON_MASS;
 			charge = PROTON_CHARGE;
 			
