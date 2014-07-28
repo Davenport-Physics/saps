@@ -65,15 +65,18 @@ inline float get_float();
 
 void get_random_location(int index, struct location *thisParticle);
 void compare_locations(int index, struct location *thisParticle);
+void calculate_summation_force(int index,double thisCharge, struct movement *this, struct location * thisParticle);
 struct location *this_that(int type, int count );
 
+double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle);
+
 void check_system();
-void calculate_difference( int index1 , int index2 , long double *x , long double *y , long double *z , int type );		 
+void calculate_difference( int index1 , int index2 , double *x , double *y , double *z , int type );		 
 void calculate_force( int index1 , int index2 , struct movement *this );
-void calculate_acceleration( long double mass , struct movement *this );
-void calculate_velocity( int index1, int index2 , long double time , struct movement *this );
-void calculate_displacement( int index1 , int index2 , long double time , struct movement *this);
-void calculate_components( long double x , long double y , long double z , struct movement *this , int type );
+void calculate_acceleration( long double mass , struct movement *this);
+void calculate_velocity( int index1, int index2 , double time , struct movement *this );
+void calculate_displacement( int index1 , int index2 , double time , struct movement *this);
+void calculate_components( double x , double y , double z , struct movement *this , int type );
 
 
 void init_particles(int numElectron, int numProton) {
@@ -374,7 +377,7 @@ void check_system() {
 	
 }
 
-void calculate_difference( int index1 , int index2 , long double *x , long double *y , long double *z , int type ) {
+void calculate_difference( int index1 , int index2 , double *x , double *y , double *z , int type ) {
 	
 	
 	struct location *thisParticle = this_that(type , 0);
@@ -390,12 +393,12 @@ void calculate_force( int index1 , int index2 ,  struct movement *this ) {
 	
 	
 	//Because interaction at the nano level is too quickly to see.
-	long double scale = 50;
+	double scale = 50;
 	
-	long double x , y , z;
-	long double distance;
+	double x , y , z;
+	double distance;
 	
-	long double first, second;
+	double first, second;
 	
 	
 	calculate_difference( index1 , index2 , &x , &y , &z , this->type );
@@ -418,15 +421,62 @@ void calculate_force( int index1 , int index2 ,  struct movement *this ) {
 										distance * scale ) - this->force;
 
 }
+void calculate_summation_force(int index, double thisCharge, struct movement *this, struct location *thisParticle) {
+	
+	int a, b;
+	
+	int num       = numParticles->amountElectron;
+	double charge = ELECTRON_CHARGE;
+	double sum    = 0;
+	
+	
+	double distance;
+	
+	struct location *thatParticle = electronLocations;
+	
+	for (a = 0; a < 2;a++) {
+		
+		for (b = 0; b < num;b++) {
+			
+			if (b == index && thisParticle == thatParticle) {
+			
+				continue;
+				
+			} else {
+				
+				distance = calculate_distance(index, b, thisParticle, thatParticle);
+				sum -= summation_electric_field( charge , distance);
+				
+			}
+			
+		}
+		num          = numParticles->amountProton;
+		charge       = PROTON_CHARGE;
+		thatParticle = protonLocations;
+	
+	}
+	this->force = sum * COULOMBS_CONSTANT * thisCharge;
+	
+
+}
+double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle) {
+	
+	double x = thisParticle[index].x - thatParticle[index2].x;
+	double y = thisParticle[index].y - thatParticle[index2].y;
+	double z = thisParticle[index].z - thatParticle[index2].z;
+	
+	return sqrt( (x * x) + ( y * y) + ( z * z ) );
+
+}
 
 void calculate_acceleration( long double mass , struct movement *this ) {
 	
 	this->acceleration += acceleration_forceMass( this->force , mass ) - this->acceleration;
 
 }
-void calculate_velocity( int index1 , int index2 ,  long double time , struct movement *this ) {
+void calculate_velocity( int index1 , int index2 , double time , struct movement *this ) {
 	
-	long double x , y , z;
+	double x , y , z;
 	
 	calculate_difference( index1 , index2 , &x , &y , &z , this->type );
 	
@@ -436,7 +486,7 @@ void calculate_velocity( int index1 , int index2 ,  long double time , struct mo
 	
 }
 
-void calculate_displacement( int index1 , int index2 , long double time , struct movement *this ) {
+void calculate_displacement( int index1 , int index2 , double time , struct movement *this ) {
 	
 	long double scale = 1;
 	
@@ -542,7 +592,7 @@ void calculate_displacement( int index1 , int index2 , long double time , struct
 	}
 	
 }
-void calculate_components( long double x , long double y , long double z , struct movement *this , int type ) {
+void calculate_components( double x , double y , double z , struct movement *this , int type ) {
 	
 	long double xytheta = atan( y / x ), yztheta = atan( z / y );
 	

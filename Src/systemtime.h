@@ -40,7 +40,7 @@
 extern int systemFinished;
 
 void *system_clock( void *n );
-long double get_system_time();
+double get_system_time();
 
 #endif
 

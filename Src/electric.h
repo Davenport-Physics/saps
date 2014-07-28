@@ -35,7 +35,8 @@
 
 #include "constants.h"
 
-double force_kqqR2( long double , long double , long double );
+double force_kqqR2( double , double , double );
+double summation_electric_field(double , double);
 
 #endif
 

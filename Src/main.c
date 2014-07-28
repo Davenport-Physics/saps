@@ -200,8 +200,8 @@ void *particle_constructor(void *n) {
 		
 		int type = ELECTRON;
 		
-		long double mass   = ELECTRON_MASS;
-		long double charge = ELECTRON_CHARGE;
+		double mass   = ELECTRON_MASS;
+		double charge = ELECTRON_CHARGE;
 		
 		pthread_t *thisThread = electronThread;
 

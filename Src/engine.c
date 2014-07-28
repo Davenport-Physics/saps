@@ -71,8 +71,8 @@ int engine_init() {
 	float degrees = (360 / SLICES);
 	float current = 0;
 	
-	coscalc = ( float * )malloc( ( SLICES + 1 ) * sizeof( float ));
-	sincalc = ( float * )malloc( ( SLICES + 1 ) * sizeof( float ));
+	coscalc = ( float * )malloc( ( SLICES ) * sizeof( float ));
+	sincalc = ( float * )malloc( ( SLICES ) * sizeof( float ));
 	
 	int x;
 	for ( x = 0; x < (int)SLICES; x++ ) {
@@ -82,8 +82,6 @@ int engine_init() {
 		current += degrees;
 		
 	}
-	coscalc[(int)SLICES] = cos(0);
-	sincalc[(int)SLICES] = sin(0);
 	
 	/*
 	 * @}

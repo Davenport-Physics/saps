@@ -59,8 +59,8 @@ enum {
 
 struct location {
 	
-	float x, y, z;
-	float radius;
+	double x, y, z;
+	double radius;
 	int done;
 	
 };
@@ -68,7 +68,7 @@ struct location {
 struct particle_attributes {
 	
 	int          index , type;
-	long double  mass  , charge; 
+	double  mass  , charge; 
 	
 };
 

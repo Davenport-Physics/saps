@@ -31,7 +31,7 @@
 
 int systemFinished;
 
-static long double systemTime;
+static double systemTime;
 
 
 /*
@@ -61,7 +61,7 @@ void *system_clock( void *n ) {
 
 }
 
-long double get_system_time() {
+double get_system_time() {
 	
 	return systemTime;
 

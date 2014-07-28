@@ -30,11 +30,16 @@
 
 #include "electric.h"
 
-double force_kqqR2(long double q, long double Q, long double distance) {
+double force_kqqR2(double q, double Q, double distance) {
 	
 	//fabsl = absolute value for long doubles.
-	distance = fabsl(distance);
+	distance = fabs(distance);
 	
 	return ( ( COULOMBS_CONSTANT * q * Q )/( distance * distance ) );
+
+}
+double summation_electric_field(double q, double distance) {
+	
+	return (q) / (distance * distance);
 
 }
