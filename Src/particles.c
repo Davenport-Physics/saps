@@ -51,7 +51,7 @@ enum {
 	
 };
 
-pthread_mutex_t ready;
+static pthread_mutex_t ready;
 
 //extern variables
 struct location *electronLocations = NULL;

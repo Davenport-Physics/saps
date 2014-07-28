@@ -48,6 +48,8 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 	
+	int retval;
+	
 	pthread_t secondary;
 	pthread_t event;
 	
@@ -98,6 +100,15 @@ int main(int argc, char **argv)
 		var.readyProton   = 0;
 		
 		typeLength = 0;
+		
+		/*
+		* systemFinished is a variable that each thread look at to keep them
+		* running. systemFinished is either CONTINUE or FINISH.
+		* 
+		* Global variable defined and declared in systemtime.c/.h
+		* 
+		* */
+		systemFinished = CONTINUE;
 	
 		printf("Type: ");
 		scanf("%s", command);
@@ -115,12 +126,36 @@ int main(int argc, char **argv)
 			scanf("%d", &numProton);
 	
 			engine_init();
-			pthread_create(&secondary, NULL, particle_constructor, (void *)&var);
-			pthread_create( &event, NULL, engine_event, ( void *)0);
+			
+			retval = pthread_create(&secondary, NULL, particle_constructor, (void *)&var);			
+			if (retval != 0) {
+			
+				printf("Constructor thread -> Error code: %d", retval);
+			
+			}
+			
+			retval = pthread_create( &event, NULL, engine_event, ( void *)0);
+			if (retval != 0) {
+				
+				printf("Event thread -> Error code: %d", retval);
+			
+			}
+			
 			engine_run( &var , types , typeLength , runtime);
 	
-			pthread_join(event, NULL);
-			pthread_join(secondary, NULL);
+			retval = pthread_join(event, NULL);
+			if (retval != 0) {
+			
+				printf("Event thread join -> Error code: %d", retval);
+				
+			}
+			
+			retval = pthread_join(secondary, NULL);
+			if (retval != 0) {
+			
+				printf("Constructor thread join -> Error code: %d", retval);
+				
+			}
 			engine_quit();
 		
 		} else if ( strcmp( command , "ball" ) == 0 ) {
@@ -162,6 +197,8 @@ void *particle_constructor(void *n) {
 	
 	int x, y;
 	
+	int retval;
+	
 	int particle = TRUE;
 	
 	pthread_t electronThread[numElectron];
@@ -176,15 +213,6 @@ void *particle_constructor(void *n) {
 	 * */
 	struct particle_attributes *electronAttributes;
 	struct particle_attributes *protonAttributes;
-	
-	/*
-	 * systemFinished is a variable that each thread look at to keep them
-	 * running. systemFinished is either CONTINUE or FINISH.
-	 * 
-	 * Global variable defined and declared in systemtime.c/.h
-	 * 
-	 * */
-	systemFinished = CONTINUE;
 	
 	pthread_create( &systemThread, NULL, system_clock, ( void *)0 );
 	
@@ -217,7 +245,13 @@ void *particle_constructor(void *n) {
 				thisAttributes[x].mass   = mass;
 				thisAttributes[x].charge = charge; 
 				thisLocation[x].done     = 0;
-				pthread_create( &thisThread[x], NULL, particles , (void *)&thisAttributes[x] );
+				retval = pthread_create( &thisThread[x], NULL, particles , (void *)&thisAttributes[x] );
+				
+				if (retval != 0) {
+				
+					printf("Particle Thread -> Error code: %d", retval);
+					
+				}
 		
 				while (electronLocations[x].done != 1 ) {
 			

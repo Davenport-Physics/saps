@@ -143,9 +143,7 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 		
 			glClear(GL_COLOR_BUFFER_BIT);
 			glLoadIdentity();
-		
-			glPushMatrix();
-			glRotatef(angle, glrf_x, glrf_y, glrf_z);
+	
 			for ( x = 0; x < typeLength; x++ ) {
 		
 				switch (types[x]) {
@@ -156,7 +154,6 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 				}
 		
 			}
-			glPopMatrix();
 			
 			SDL_GL_SwapWindow(Window);
 			nanosleep( &hold , NULL );
@@ -188,8 +185,8 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 		glPushMatrix();
 			
 			glColor3f( 0.0f,0.0f,0.0f );
+			glRotatef(angle, glrf_x, glrf_y, glrf_z);
 			glTranslatef( electronLocations[x].x + glTf_x, electronLocations[x].y + glTf_y , electronLocations[x].z + glTf_z);
-			//drawCircle( electronLocations[x].radius, 30);
 			drawCircle_v2(electronLocations[x].radius);
 	
 		glPopMatrix();
@@ -200,8 +197,8 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 		glPushMatrix();
 		
 			glColor3f( 0.0f,0.0f,1.0f );
+			glRotatef(angle, glrf_x, glrf_y, glrf_z);
 			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-			//drawCircle( protonLocations[x].radius, 30);
 			drawCircle_v2(protonLocations[x].radius);
 		
 		glPopMatrix();
@@ -251,17 +248,21 @@ void drawCircle_v2(float radius) {
 }
 void draw_default_flat_plane() {
 	
-	glBegin(GL_QUADS);
+	glPushMatrix();
 	
 		glColor3f(0.1f, 0.9f , 0.1f);
-		glTranslatef( 1.0f + glTf_x , 1.0f + glTf_y , 1.0f + glTf_z);
-		
+		glTranslatef( glTf_x , glTf_y , glTf_z);
+		glRotatef(angle, glrf_x, glrf_y, glrf_z);
+	
+	glBegin(GL_QUADS);
+	
 		glVertex3f( 0.0f , 0.0f , 0.0f );
 		glVertex3f( 0.0f , 1.0f , 0.0f );
 		glVertex3f( 1.0f , 1.0f , 0.0f );
 		glVertex3f( 1.0f , 0.0f , 0.0f );
 	
 	glEnd();
+	glPopMatrix();
 	
 }
 
