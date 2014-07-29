@@ -1,4 +1,4 @@
-A rudimentary physics simulator
+Semi-accurate physics simulator
 ===============================
 
 
