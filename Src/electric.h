@@ -35,8 +35,13 @@
 
 #include "constants.h"
 
-double force_kqqR2( double , double , double );
-double summation_electric_field(double , double);
+double force_kqqR2( double q, double Q, double radius);
+
+double electric_field_kqR2(double q, double radius);
+double summation_electric_field(double q, double radius);
+
+double potential_kqR( double q, double radius );
+double summation_potential( double q , double radius );
 
 #endif
 
