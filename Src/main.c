@@ -189,6 +189,7 @@ int main(int argc, char **argv)
 		}
 		
 		free( types );
+		types = NULL;
 		
 	}	
 	
@@ -200,7 +201,19 @@ void *particle_constructor(void *n) {
 	
 	int retval;
 	
-	int particle = TRUE;
+	/*
+	 * I plan on having the contructor be able to set up different simulations.
+	 * So this variable was set up as a prelude to that eventual code base.
+	 * */
+	int particle     = TRUE;
+	
+	/*
+	 * This variable is used for mutex conditional statements. It's primary
+	 * use is to prevent a thread from not receiving a mutex conditional
+	 * signal, due to it not locking the mutex in time.
+	 * 
+	 * */
+	int mutexcondition = FALSE;
 	
 	pthread_t electronThread[numElectron];
 	pthread_t protonThread[numProton];
@@ -223,7 +236,7 @@ void *particle_constructor(void *n) {
 	
 	if (particle == TRUE) {
 		
-		init_particles(numElectron, numProton, &initcond, &startcond);
+		init_particles(numElectron, numProton, &initcond, &startcond, &mutexcondition);
 		
 		electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
 		protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
@@ -280,10 +293,8 @@ void *particle_constructor(void *n) {
 			thisThread = protonThread;
 			
 		}
-		
+		mutexcondition = TRUE;
 		pthread_cond_broadcast(&startcond);
-		pthread_cond_destroy(&startcond);
-		pthread_cond_destroy(&initcond);
 		
 	}
 	

@@ -57,15 +57,17 @@ static pthread_mutex_t ready      = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 static pthread_cond_t *particleInitial;
 static pthread_cond_t *startcondition;
 
+static struct timespec hold;
+
+static int *mutexcondition;
+
 //extern variables
 struct location *electronLocations = NULL;
 struct location *protonLocations   = NULL;
 struct location *neutronLocations  = NULL;
 struct amount   *numParticles      = NULL;
 
-static struct timespec hold;
-
-inline float get_float();
+float get_float();
 
 void get_random_location(int index, struct location *thisParticle);
 void compare_locations(int index, struct location *thisParticle);
@@ -80,7 +82,7 @@ void calculate_displacement( double time , struct movement *this);
 double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle);
 
 
-void init_particles(int numElectron, int numProton, pthread_cond_t *thisCond, pthread_cond_t *startcond) {
+void init_particles(int numElectron, int numProton, pthread_cond_t *thisCond, pthread_cond_t *startcond, int *condition) {
 	
 	hold.tv_sec = 0;
 	hold.tv_nsec = 250000000;
@@ -98,6 +100,8 @@ void init_particles(int numElectron, int numProton, pthread_cond_t *thisCond, pt
 	
 	particleInitial = thisCond;
 	startcondition  = startcond;
+	
+	mutexcondition = condition;
 
 }
 
@@ -274,7 +278,11 @@ void check_system() {
 	
 	pthread_mutex_lock(&startmutex);
 	
-		pthread_cond_wait(startcondition, &startmutex);
+		while (*mutexcondition == FALSE) {
+			
+			pthread_cond_wait(startcondition, &startmutex);
+			
+		}
 		
 	pthread_mutex_unlock(&startmutex);
 	

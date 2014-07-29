@@ -87,7 +87,7 @@ extern struct location *neutronLocations;
 
 extern struct amount *numParticles;
 
-void init_particles(int numElectron, int numProton, pthread_cond_t *, pthread_cond_t *);
+void init_particles(int numElectron, int numProton, pthread_cond_t *, pthread_cond_t *, int *condition);
 void quit_particles();
 
 void *particles(void *);
