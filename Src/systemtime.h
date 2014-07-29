@@ -37,6 +37,13 @@
 #define CONTINUE 0
 #define FINISH 1
 
+enum {
+	
+	FALSE = 0,
+	TRUE
+	
+};
+
 extern int systemFinished;
 
 void *system_clock( void *n );
