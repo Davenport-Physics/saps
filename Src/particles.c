@@ -166,7 +166,9 @@ void *particles(void *att) {
 		calculate_velocity( initialTime - time , &current);
 		calculate_displacement( initialTime - time , &current );
 		
-		
+		/*thisParticle[index].x += current.displacementX;
+		thisParticle[index].y += current.displacementY;
+		thisParticle[index].z += current.displacementZ;*/
 		
 		temp = new_position(thisParticle[index].x , current.displacementX , thisParticle[index].radius);
 		if ( current.displacementX != temp ) {
@@ -201,7 +203,7 @@ void *particles(void *att) {
 			thisParticle[index].z += current.displacementZ;
 		
 		}
-	
+		
 		thisParticle[index].radius = (1 + thisParticle[index].z) / 22.22;
 	
 		initialTime = time;
@@ -297,7 +299,19 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 	double charge      = ELECTRON_CHARGE;
 	double sumx        = 0, sumy = 0, sumz = 0;
 	const double kq    = COULOMBS_CONSTANT * thisCharge;
-	const double scale = 100000; //Used to decrease the amount of force felt by a particle.
+	
+	/*
+	 * Used to decrease the amount of force a particle feels. This allows
+	 * us to view the particles in a more reasonable manner. This will only be
+	 * temporary however.
+	 * */
+	const double scale = 100000;
+	
+	double sumpotenx[2] = {0,0};
+	double sumpoteny[2] = {0,0};
+	double sumpotenz[2] = {0,0};
+	
+	double deltax ,deltay , deltaz;
 	
 	struct location *thatParticle = electronLocations;
 	
@@ -311,10 +325,22 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 				continue;
 				
 			} else {
+								
+				deltax = thisParticle[index].x - thatParticle[b].x;
+				deltay = thisParticle[index].y - thatParticle[b].y;
+				deltaz = thisParticle[index].z - thatParticle[b].z;
 				
-				sumx += summation_electric_field( charge , thisParticle[index].x - thatParticle[b].x);
-				sumy += summation_electric_field( charge , thisParticle[index].y - thatParticle[b].y);
-				sumz += summation_electric_field( charge , thisParticle[index].z - thatParticle[b].z);
+				sumx += summation_electric_field( charge , deltax );
+				sumy += summation_electric_field( charge , deltay );
+				sumz += summation_electric_field( charge , deltaz );
+					
+				sumpotenx[0] += summation_potential( charge , deltax );
+				sumpoteny[0] += summation_potential( charge , deltay );
+				sumpotenz[0] += summation_potential( charge , deltaz ); 
+					
+				sumpotenx[1] += summation_potential( charge , deltax + .1 );
+				sumpoteny[1] += summation_potential( charge , deltay + .1 );
+				sumpotenz[1] += summation_potential( charge , deltaz + .1 );
 				
 			}
 			
@@ -324,10 +350,62 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 		thatParticle = protonLocations;
 	
 	}
-	this->force  = kq * sqrt( (sumx * sumx) + (sumy * sumy) + (sumz * sumz));
-	this->forceX = (kq * sumx)/scale;
-	this->forceY = (kq * sumy)/scale;
-	this->forceZ = (kq * sumz)/scale;
+	
+	if ( sumpotenx[0] < sumpotenx[1] && thisCharge < 0 ) {
+		
+		this->forceX = fabs((kq * sumx) / scale);
+		
+	} else if ( sumpotenx[0] < sumpotenx[1] && thisCharge > 0 ) {
+	
+		this->forceX = -fabs((kq * sumx) / scale);
+		
+	} else if ( sumpotenx[0] > sumpotenx[1] && thisCharge < 0  ) {
+		
+		this->forceX = -fabs((kq * sumx) / scale);
+	
+	} else if ( sumpotenx[0] > sumpotenx[1] && thisCharge > 0 ) {
+	
+		this->forceX = fabs((kq * sumx) / scale);
+		
+	}
+	
+	if ( sumpoteny[0] < sumpoteny[1] && thisCharge < 0 ) {
+		
+		this->forceY = fabs((kq * sumy) / scale);
+		
+	} else if ( sumpoteny[0] < sumpoteny[1] && thisCharge > 0 ) {
+	
+		this->forceY = -fabs((kq * sumy) / scale);
+		
+	} else if ( sumpoteny[0] > sumpoteny[1] && thisCharge < 0  ) {
+		
+		this->forceY = -fabs((kq * sumy) / scale);
+	
+	} else if ( sumpoteny[0] > sumpoteny[1] && thisCharge > 0 ) {
+	
+		this->forceY = fabs((kq * sumy) / scale);
+		
+	}
+	
+	if ( sumpotenz[0] < sumpotenz[1] && thisCharge < 0 ) {
+		
+		this->forceZ = fabs((kq * sumz) / scale);
+		
+	} else if ( sumpotenz[0] < sumpotenz[1] && thisCharge > 0 ) {
+	
+		this->forceZ = -fabs((kq * sumz) / scale);
+		
+	} else if ( sumpotenz[0] > sumpotenz[1] && thisCharge < 0  ) {
+		
+		this->forceZ = -fabs((kq * sumz) / scale);
+	
+	} else if ( sumpotenz[0] > sumpotenz[1] && thisCharge > 0 ) {
+	
+		this->forceZ = fabs((kq * sumz) / scale);
+		
+	}
+	
+	this->force  = (kq * sqrt( (sumx * sumx) + (sumy * sumy) + (sumz * sumz)));
 	
 
 }

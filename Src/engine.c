@@ -354,6 +354,7 @@ void *engine_event(void *n) {
 							
 							glrf_y = -1;
 							angle += 10 * (event.motion.yrel);
+							
 						}
 						
 					}

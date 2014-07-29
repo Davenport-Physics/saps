@@ -33,7 +33,6 @@
 double force_kqqR2(double q, double Q, double radius) {
 	
 	//fabsl = absolute value for long doubles.
-	distance = fabs(distance);
 	
 	return ( ( COULOMBS_CONSTANT * q * Q )/( radius * radius ) );
 
@@ -53,12 +52,12 @@ double summation_electric_field(double q, double radius) {
 
 double potential_kqR( double q , double radius) {
 	
-	return ( COULOMBS_CONSTANT * q ) / radius;
+	return ( ( COULOMBS_CONSTANT * q ) / fabs( radius ) );
 	
 }
 
 double summation_potential( double q , double radius ) {
 	
-	return (q / radius);
+	return ( q / fabs( radius ) );
 	
 }
