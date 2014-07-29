@@ -5,7 +5,7 @@ CFLAGS = -Wall -O3 -c -mtune=native -march=native $(DEBUG)
 LFLAGS = -lpthread -lGL -lSDL2 -lm -D_GNU_SOURCE $(DEBUG)
 
 physics : $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) -o physics
+	$(CC) $(LFLAGS) $(OBJS) -o saps
 
 main.o : main.c particles.h constants.h systemtime.h engine.h
 	$(CC) $(CFLAGS) main.c

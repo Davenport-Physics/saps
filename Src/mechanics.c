@@ -1,5 +1,5 @@
 /*
-*    Physics Sim
+*    Semi-accurate physics simulator (SAPS)
 *
 *    Copyright (C) 2014 Michael Davenport <Davenport.physics@gmail.com>
 *
