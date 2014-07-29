@@ -15,6 +15,4 @@ Dependencies
 -SDL2
 
 
-
-
-Please see the wiki for more information regarding miscellaneous bits of information such as potential system requirements. 
+Please see the wiki for more information.
