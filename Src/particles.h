@@ -13,8 +13,8 @@
 *   the Software is furnished to do so, subject to the following 
 *   conditions:
 *
-*   	The above copyright notice and this permission notice shall be 
-*   	included in all copies or substantial portions of the Software.
+*   The above copyright notice and this permission notice shall be 
+*   included in all copies or substantial portions of the Software.
 *
 *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
 *   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -29,6 +29,8 @@
 
 #ifndef	PARTICLES_H
 #define	PARTICLES_H
+
+#define _GNU_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,7 +87,7 @@ extern struct location *neutronLocations;
 
 extern struct amount *numParticles;
 
-void init_particles(int numElectron, int numProton);
+void init_particles(int numElectron, int numProton, pthread_cond_t *, pthread_cond_t *);
 void quit_particles();
 
 void *particles(void *);

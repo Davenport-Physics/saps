@@ -13,8 +13,8 @@
 *   the Software is furnished to do so, subject to the following 
 *   conditions:
 *
-*   	The above copyright notice and this permission notice shall be 
-*   	included in all copies or substantial portions of the Software.
+*   The above copyright notice and this permission notice shall be 
+*   included in all copies or substantial portions of the Software.
 *
 *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
 *   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -26,6 +26,7 @@
 *   OTHER DEALINGS IN THE SOFTWARE.
 *
 */
+#define _GNU_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -205,6 +206,10 @@ void *particle_constructor(void *n) {
 	pthread_t protonThread[numProton];
 	pthread_t systemThread;
 	
+	pthread_mutex_t initmutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+	pthread_cond_t  initcond  = PTHREAD_COND_INITIALIZER;
+	pthread_cond_t  startcond = PTHREAD_COND_INITIALIZER;
+	
 	struct enginevars *vars = (struct enginevars *)n;
 	
 	/*
@@ -218,7 +223,7 @@ void *particle_constructor(void *n) {
 	
 	if (particle == TRUE) {
 		
-		init_particles(numElectron, numProton);
+		init_particles(numElectron, numProton, &initcond, &startcond);
 		
 		electronAttributes = ( struct particle_attributes * )malloc( numElectron * sizeof( struct particle_attributes ) );
 		protonAttributes   = ( struct particle_attributes * )malloc( numProton * sizeof( struct particle_attributes ) );
@@ -253,11 +258,12 @@ void *particle_constructor(void *n) {
 					
 				}
 		
-				while (electronLocations[x].done != 1 ) {
-			
-					nanosleep( &hold , NULL );
-		
-				}
+				pthread_mutex_lock(&initmutex);
+				
+					pthread_cond_wait(&initcond, &initmutex);
+				
+				pthread_mutex_unlock(&initmutex);
+				
 				*readyParticle += 1;
 	
 			}
@@ -274,6 +280,10 @@ void *particle_constructor(void *n) {
 			thisThread = protonThread;
 			
 		}
+		
+		pthread_cond_broadcast(&startcond);
+		pthread_cond_destroy(&startcond);
+		pthread_cond_destroy(&initcond);
 		
 	}
 	

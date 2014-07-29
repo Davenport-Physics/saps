@@ -13,8 +13,8 @@
 *   the Software is furnished to do so, subject to the following 
 *   conditions:
 *
-*   	The above copyright notice and this permission notice shall be 
-*   	included in all copies or substantial portions of the Software.
+*   The above copyright notice and this permission notice shall be 
+*   included in all copies or substantial portions of the Software.
 *
 *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
 *   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -51,7 +51,11 @@ enum {
 	
 };
 
-static pthread_mutex_t ready;
+static pthread_mutex_t startmutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP; 
+static pthread_mutex_t ready      = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+
+static pthread_cond_t *particleInitial;
+static pthread_cond_t *startcondition;
 
 //extern variables
 struct location *electronLocations = NULL;
@@ -76,7 +80,7 @@ void calculate_displacement( double time , struct movement *this);
 double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle);
 
 
-void init_particles(int numElectron, int numProton) {
+void init_particles(int numElectron, int numProton, pthread_cond_t *thisCond, pthread_cond_t *startcond) {
 	
 	hold.tv_sec = 0;
 	hold.tv_nsec = 250000000;
@@ -91,6 +95,9 @@ void init_particles(int numElectron, int numProton) {
 	numParticles->amountElectron = numElectron;
 	numParticles->amountProton = numProton;
 	numParticles->total = numElectron + numProton;
+	
+	particleInitial = thisCond;
+	startcondition  = startcond;
 
 }
 
@@ -132,13 +139,14 @@ void *particles(void *att) {
 	compare_locations( index , thisParticle );
 	
 	thisParticle[index].radius = ( 1 + thisParticle[index].z ) / 22.22;
-	thisParticle[index].done = 1;
 	
 	pthread_mutex_lock(&ready);
 	
 		numParticles->ready++;
 	
 	pthread_mutex_unlock(&ready);
+	
+	pthread_cond_signal(particleInitial);
 	
 	check_system();
 	
@@ -264,12 +272,12 @@ float get_float() {
 
 void check_system() {
 	
+	pthread_mutex_lock(&startmutex);
 	
-	while ( numParticles[0].ready != numParticles[0].total ) {
+		pthread_cond_wait(startcondition, &startmutex);
 		
-		nanosleep( &hold , NULL );
-		
-	}
+	pthread_mutex_unlock(&startmutex);
+	
 	
 }
 
