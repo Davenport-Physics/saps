@@ -1,0 +1,37 @@
+Semi-accurate physics simulator (SAPS) Version .1
+
+
+Release Notes
+-------------
+
+-Ported from Glut to SDL2. Reused most of the opengl code.
+-Added shifting of camera view.
+-Added rudimentary object rotation.
+-Reduce code ambiguity in certain areas
+
+
+Release Fixes
+-------------
+
+-Protons and Electrons interact correctly through the electric force.
+-Protons and Electrons move in the correct directions
+-Fixed Race condition where threads would halt in certain cases
+
+
+Comments
+--------
+
+I began writing this program during my freshmen year in college. At the time I
+thought I knew enough C to write such an ambitious program. However it is now
+two years later and I am finally releasing my first version of the program.
+
+Version .1 is the program I wanted to write two years ago, and I'm very happy
+that I finally finished it. 
+
+Am I done working with SAPS? No, not at all. I have learned a lot about C
+programming, and I wish to continue to learn. Therefore I will be developing
+this application further when I have time. I am after all, still a college
+student who is majoring in physics and not in computer programming.Therefore time is
+very limited for me during the school year. However, instead of wasting my
+time with computer games, I will now be replacing that hobby with developing
+this application further.
