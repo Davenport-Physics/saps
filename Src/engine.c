@@ -31,11 +31,11 @@
 
 void draw_default_flat_plane();
 void draw_random_ball();
+void draw_particles( int *readyElectron , int *readyProton );
 
-void drawParticles( int *readyElectron , int *readyProton );
-void drawCircle(float radius, float triangles);
-void drawCircle_v2(float radius);
-void drawSphere(double r, int lats, int longs);
+void draw_circle(float radius);
+void draw_3D_rectangle(float length, float depth, float height);
+void draw_sphere(double r, int lats, int longs);
 
 static float *coscalc;
 static float *sincalc;
@@ -120,7 +120,7 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 	
 	struct timespec hold;
 	hold.tv_sec  = 0;
-	hold.tv_nsec = 1666666;
+	hold.tv_nsec = (1e9)/30;
 	
 	glTf_x = 0.0f;
 	glTf_y = 0.0f;
@@ -148,8 +148,8 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 		
 				switch (types[x]) {
 				
-					case 1: drawParticles( &vars->readyElectron , &vars->readyProton ); break;
-					case 2: draw_default_flat_plane(); break;
+					case 1: draw_particles( &vars->readyElectron , &vars->readyProton ); break;
+					case 2: draw_3D_rectangle( 1.0f , 1.0f , 1.0f ); break;
 			
 				}
 		
@@ -176,7 +176,7 @@ void engine_run(struct enginevars *vars, int *types, int typeLength , enum engin
 	SDL_GL_DeleteContext(glcontext);
 	
 }
-void drawParticles( int *readyElectron , int *readyProton ) {
+void draw_particles( int *readyElectron , int *readyProton ) {
 	
 	int x;
 	
@@ -187,7 +187,7 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 			glColor3f( 0.0f,0.0f,0.0f );
 			glRotatef(angle, glrf_x, glrf_y, glrf_z);
 			glTranslatef( electronLocations[x].x + glTf_x, electronLocations[x].y + glTf_y , electronLocations[x].z + glTf_z);
-			drawCircle_v2(electronLocations[x].radius);
+			draw_circle(electronLocations[x].radius);
 	
 		glPopMatrix();
 	
@@ -199,41 +199,21 @@ void drawParticles( int *readyElectron , int *readyProton ) {
 			glColor3f( 0.0f,0.0f,1.0f );
 			glRotatef(angle, glrf_x, glrf_y, glrf_z);
 			glTranslatef( protonLocations[x].x , protonLocations[x].y , protonLocations[x].z );
-			drawCircle_v2(protonLocations[x].radius);
+			draw_circle(protonLocations[x].radius);
 		
 		glPopMatrix();
 	
 	}
 	
 }
-void drawCircle(float radius, float triangles) {
-	
-	float degrees = ( 360 / triangles );
-	float current = 0;
-	
-	int x;
-	
-	glBegin(GL_TRIANGLES);
-
-		for ( x = 0; x < (int)triangles; x++) {
-			
-			glVertex3f( radius * cos( current * (M_PI/180) ), radius * sin( current * (M_PI/180) ) , 0.0f );
-			current += degrees;
-			glVertex3f( radius * cos( current * ( M_PI / 180 ) ), radius * sin( current * (M_PI/180) ) , 0.0f );
-			glVertex3f(0.0f, 0.0f, 0.0f);
-		
-		}
-	
-	glEnd();
-}
 
 /*
- * drawCircle_v2 uses the initialized array variables coscalc and sincalc
+ * drawCircle uses the initialized array variables coscalc and sincalc
  * to avoid having to call cos and sin during every frame that a circle
  * is drawn.
  * 
  * */
-void drawCircle_v2(float radius) {
+void draw_circle(float radius) {
 	
 	int x;
 	
@@ -246,13 +226,60 @@ void drawCircle_v2(float radius) {
 	glEnd();
 
 }
+void draw_3D_rectangle(float length, float depth, float height) {
+
+	glPushMatrix();
+	
+		glColor3f(0.1f, 0.75f , 0.1f);
+		glTranslatef( glTf_x , glTf_y , glTf_z);
+		glRotatef(90 + angle, glrf_x, 1, glrf_y);
+	
+		glBegin(GL_QUADS);
+		
+			glVertex3f( 0.0f   , 0.0f   , 0.0f );
+			glVertex3f( 0.0f   , height , 0.0f );
+			glVertex3f( length , height , 0.0f );
+			glVertex3f( length , 0.0f   , 0.0f );
+			
+		glEnd();
+		
+		glBegin(GL_QUADS);
+		
+			glVertex3f( 0.0f   , 0.0f   , depth );
+			glVertex3f( 0.0f   , height , depth );
+			glVertex3f( length , height , depth );
+			glVertex3f( length , 0.0f   , depth );
+		
+		glEnd();
+		
+		glBegin(GL_QUADS);
+		
+			glVertex3f( 0.0f , 0.0f   , 0.0f );
+			glVertex3f( 0.0f , height , 0.0f );
+			glVertex3f( 0.0f , height , depth );
+			glVertex3f( 0.0f , 0.0f   , depth );
+		
+		glEnd();
+		
+		glBegin(GL_QUADS);
+		
+			glVertex3f( length , 0.0f   , 0.0f );
+			glVertex3f( length , height , 0.0f );
+			glVertex3f( length , height , depth );
+			glVertex3f( length , 0.0f   , depth );
+		
+		glEnd();
+		
+	glPopMatrix();	
+	
+}
 void draw_default_flat_plane() {
 	
 	glPushMatrix();
 	
-		glColor3f(0.1f, 0.9f , 0.1f);
+		glColor3f(0.1f, 0.75f , 0.1f);
 		glTranslatef( glTf_x , glTf_y , glTf_z);
-		glRotatef(angle, glrf_x, glrf_y, glrf_z);
+		glRotatef(angle, glrf_x, glrf_y, glrf_y);
 	
 	glBegin(GL_QUADS);
 	

@@ -33,11 +33,14 @@
 #include <time.h>
 
 #include <pthread.h>
+#include <unistd.h>
 
 #include "particles.h"
 #include "constants.h"
 #include "engine.h"
 #include "systemtime.h"
+
+int get_num_cpu_cores();
 
 void *particle_constructor(void *n);
 
@@ -234,6 +237,22 @@ void *particle_constructor(void *n) {
 	
 	pthread_create( &systemThread, NULL, system_clock, ( void *)0 );
 	
+	/*
+	 * Used for pthread affinity. This helps with load balancing of threads,
+	 * instead of having all threads max a single core.
+	 * 
+	 * */
+	int CurrentCpu = 0;
+	int numcpu = get_num_cpu_cores();
+	cpu_set_t cpuset[numcpu];
+	
+	for ( x = 0; x < numcpu; x++ ) {
+	
+		CPU_ZERO(&cpuset[x]);
+		CPU_SET(x , &cpuset[x]);
+		
+	}
+	
 	if (particle == TRUE) {
 		
 		init_particles(numElectron, numProton, &initcond, &startcond, &mutexcondition);
@@ -270,6 +289,23 @@ void *particle_constructor(void *n) {
 					printf("Particle Thread -> Error code: %d", retval);
 					
 				}
+				
+				/*
+				 * This code tells the kernel that we want to run a specific thread
+				 * on a specific core.
+				 * {@
+				 * */
+				if ( CurrentCpu >= numcpu ) {
+				
+					CurrentCpu = 0;
+					
+				}
+				
+				pthread_setaffinity_np( thisThread[x] , sizeof( cpu_set_t ) , &cpuset[ CurrentCpu ] );
+				CurrentCpu++;
+				/*
+				 * @} 
+				 * */
 		
 				pthread_mutex_lock(&initmutex);
 				
@@ -334,4 +370,9 @@ void *particle_constructor(void *n) {
 	
 }
 
+int get_num_cpu_cores() {
+	
+	return sysconf(_SC_NPROCESSORS_ONLN);
+	
+}
 
