@@ -32,32 +32,45 @@
 
 double force_kqqR2(double q, double Q, double radius) {
 	
-	//fabsl = absolute value for long doubles.
-	
-	return ( ( COULOMBS_CONSTANT * q * Q )/( radius * radius ) );
+	if ( radius != 0 )
+		return ( ( COULOMBS_CONSTANT * q * Q )/( radius * radius ) );
+	else
+		return 0;
 
 }
 
 double electric_field_kqR2(double q , double radius) {
 	
-	return (COULOMBS_CONSTANT * q)/(radius * radius);
+	if ( radius != 0 )
+		return (COULOMBS_CONSTANT * q)/(radius * radius);
+	else
+		return 0;
 
 }
 
 double summation_electric_field(double q, double radius) {
 	
-	return (q) / (radius * radius);
+	if ( radius != 0 )
+		return (q) / (radius * radius);
+	else
+		return 0;
 
 }
 
 double potential_kqR( double q , double radius) {
 	
-	return ( ( COULOMBS_CONSTANT * q ) / fabs( radius ) );
+	if ( radius != 0)
+		return ( ( COULOMBS_CONSTANT * q ) / fabs( radius ) );
+	else
+		return 0;
 	
 }
 
-double summation_potential( double q , double radius ) {
+__attribute__ ((hot)) double summation_potential( double q , double radius ) {
 	
-	return ( q / fabs( radius ) );
+	if ( radius != 0 )
+		return ( q / fabs( radius ) );
+	else
+		return 0;
 	
 }

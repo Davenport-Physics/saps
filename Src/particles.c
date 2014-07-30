@@ -291,7 +291,7 @@ void check_system() {
 	
 }
 
-void calculate_summation_force(int index, double thisCharge, struct movement *this, struct location *thisParticle) {
+__attribute__ ((hot)) void calculate_summation_force(int index, double thisCharge, struct movement *this, struct location *thisParticle) {
 	
 	int a, b;
 	int num = numParticles->amountElectron;
@@ -315,6 +315,13 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 	
 	struct location *thatParticle = electronLocations;
 	
+	/*
+	 * This variable is used to obtain the potential from the electric field.
+	 * This allows the computer to avoid calling a function, multiplying a variable
+	 * then returning the variable.
+	 * 
+	 * */
+	double temp = 0;
 	
 	for (a = 0; a < 2;a++) {
 		
@@ -330,13 +337,17 @@ void calculate_summation_force(int index, double thisCharge, struct movement *th
 				deltay = thisParticle[index].y - thatParticle[b].y;
 				deltaz = thisParticle[index].z - thatParticle[b].z;
 				
-				sumx += summation_electric_field( charge , deltax );
-				sumy += summation_electric_field( charge , deltay );
-				sumz += summation_electric_field( charge , deltaz );
-					
-				sumpotenx[0] += summation_potential( charge , deltax );
-				sumpoteny[0] += summation_potential( charge , deltay );
-				sumpotenz[0] += summation_potential( charge , deltaz ); 
+				temp         = summation_electric_field( charge , deltax );
+				sumx        += temp;
+				sumpotenx[0] = temp/deltax;
+				
+				temp         = summation_electric_field( charge , deltay );
+				sumy        += temp;
+				sumpoteny[0] = temp/deltay;
+				
+				temp         = summation_electric_field( charge , deltaz );
+				sumz        += temp;
+				sumpoteny[0] = temp/deltaz;
 					
 				sumpotenx[1] += summation_potential( charge , deltax + .1 );
 				sumpoteny[1] += summation_potential( charge , deltay + .1 );
