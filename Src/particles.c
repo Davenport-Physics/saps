@@ -67,19 +67,20 @@ struct location *protonLocations   = NULL;
 struct location *neutronLocations  = NULL;
 struct amount   *numParticles      = NULL;
 
-float get_float();
-
+void check_system();
 void get_random_location(int index, struct location *thisParticle);
 void compare_locations(int index, struct location *thisParticle);
-void calculate_summation_force(int index, double thisCharge , struct movement *this , struct location * thisParticle);
 
-void check_system();	 
-void calculate_force( int index1 , int index2 , struct movement *this );
 void calculate_acceleration( double mass , struct movement *this);
+void calculate_force( int index1 , int index2 , struct movement *this );
+void calculate_summation_force(int index, double thischarge , struct movement *this , struct location * thisparticle);
 void calculate_velocity( double time , struct movement *this );
 void calculate_displacement( double time , struct movement *this);
 
+float get_float();	 
+
 double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle);
+double calculate_direction_force(double sumpotena, double sumpotenb, double sum, double scale, double thischarge);
 
 
 void init_particles(int numElectron, int numProton, pthread_cond_t *thisCond, pthread_cond_t *startcond, int *condition) {
@@ -291,14 +292,14 @@ void check_system() {
 	
 }
 
-__attribute__ ((hot)) void calculate_summation_force(int index, double thisCharge, struct movement *this, struct location *thisParticle) {
+__attribute__ ((hot)) void calculate_summation_force(int index, double thischarge, struct movement *this, struct location *thisparticle) {
 	
 	int a, b;
 	int num = numParticles->amountElectron;
 	
 	double charge      = ELECTRON_CHARGE;
 	double sumx        = 0, sumy = 0, sumz = 0;
-	const double kq    = COULOMBS_CONSTANT * thisCharge;
+	const double kq    = COULOMBS_CONSTANT * thischarge;
 	
 	/*
 	 * Used to decrease the amount of force a particle feels. This allows
@@ -313,7 +314,7 @@ __attribute__ ((hot)) void calculate_summation_force(int index, double thisCharg
 	
 	double deltax ,deltay , deltaz;
 	
-	struct location *thatParticle = electronLocations;
+	struct location *thatparticle = electronLocations;
 	
 	/*
 	 * This variable is used to obtain the potential from the electric field.
@@ -327,15 +328,15 @@ __attribute__ ((hot)) void calculate_summation_force(int index, double thisCharg
 		
 		for (b = 0; b < num;b++) {
 			
-			if (b == index && thisParticle == thatParticle) {
+			if (b == index && thisparticle == thatparticle) {
 			
 				continue;
 				
 			} else {
 								
-				deltax = thisParticle[index].x - thatParticle[b].x;
-				deltay = thisParticle[index].y - thatParticle[b].y;
-				deltaz = thisParticle[index].z - thatParticle[b].z;
+				deltax = thisparticle[index].x - thatparticle[b].x;
+				deltay = thisparticle[index].y - thatparticle[b].y;
+				deltaz = thisparticle[index].z - thatparticle[b].z;
 				
 				temp          = summation_electric_field( charge , deltax );
 				sumx         += temp;
@@ -358,67 +359,43 @@ __attribute__ ((hot)) void calculate_summation_force(int index, double thisCharg
 		}
 		num          = numParticles->amountProton;
 		charge       = PROTON_CHARGE;
-		thatParticle = protonLocations;
+		thatparticle = protonLocations;
 	
 	}
 	
-	if ( sumpotenx[0] < sumpotenx[1] && thisCharge < 0 ) {
-		
-		this->forceX = fabs((kq * sumx) / scale);
-		
-	} else if ( sumpotenx[0] < sumpotenx[1] && thisCharge > 0 ) {
-	
-		this->forceX = -fabs((kq * sumx) / scale);
-		
-	} else if ( sumpotenx[0] > sumpotenx[1] && thisCharge < 0  ) {
-		
-		this->forceX = -fabs((kq * sumx) / scale);
-	
-	} else if ( sumpotenx[0] > sumpotenx[1] && thisCharge > 0 ) {
-	
-		this->forceX = fabs((kq * sumx) / scale);
-		
-	}
-	
-	if ( sumpoteny[0] < sumpoteny[1] && thisCharge < 0 ) {
-		
-		this->forceY = fabs((kq * sumy) / scale);
-		
-	} else if ( sumpoteny[0] < sumpoteny[1] && thisCharge > 0 ) {
-	
-		this->forceY = -fabs((kq * sumy) / scale);
-		
-	} else if ( sumpoteny[0] > sumpoteny[1] && thisCharge < 0  ) {
-		
-		this->forceY = -fabs((kq * sumy) / scale);
-	
-	} else if ( sumpoteny[0] > sumpoteny[1] && thisCharge > 0 ) {
-	
-		this->forceY = fabs((kq * sumy) / scale);
-		
-	}
-	
-	if ( sumpotenz[0] < sumpotenz[1] && thisCharge < 0 ) {
-		
-		this->forceZ = fabs((kq * sumz) / scale);
-		
-	} else if ( sumpotenz[0] < sumpotenz[1] && thisCharge > 0 ) {
-	
-		this->forceZ = -fabs((kq * sumz) / scale);
-		
-	} else if ( sumpotenz[0] > sumpotenz[1] && thisCharge < 0  ) {
-		
-		this->forceZ = -fabs((kq * sumz) / scale);
-	
-	} else if ( sumpotenz[0] > sumpotenz[1] && thisCharge > 0 ) {
-	
-		this->forceZ = fabs((kq * sumz) / scale);
-		
-	}
-	
+	this->forceX = calculate_direction_force( sumpotenx[0] , sumpotenx[1] , sumx , scale , thischarge );
+	this->forceY = calculate_direction_force( sumpoteny[0] , sumpoteny[1] , sumy , scale , thischarge );
+	this->forceZ = calculate_direction_force( sumpotenz[0] , sumpotenz[1] , sumz , scale , thischarge );
 	this->force  = (kq * sqrt( (sumx * sumx) + (sumy * sumy) + (sumz * sumz)));
 	
 
+}
+double calculate_direction_force(double sumpotena, double sumpotenb, double sum, double scale, double thischarge) {
+	
+	const double kq = COULOMBS_CONSTANT * thischarge;
+	
+	if ( sumpotena < sumpotenb && thischarge < 0 ) {
+		
+		return fabs((kq * sum) / scale);
+		
+	} else if ( sumpotena < sumpotenb && thischarge > 0 ) {
+	
+		return -fabs((kq * sum) / scale);
+		
+	} else if ( sumpotena > sumpotenb && thischarge < 0  ) {
+		
+		return -fabs((kq * sum) / scale);
+	
+	} else if ( sumpotena > sumpotenb && thischarge > 0 ) {
+	
+		return fabs((kq * sum) / scale);
+		
+	} else {
+	
+		return 0;
+		
+	}
+	
 }
 double calculate_distance(int index, int index2, struct location *thisParticle, struct location *thatParticle) {
 	

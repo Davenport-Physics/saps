@@ -232,7 +232,7 @@ void draw_3D_rectangle(float length, float depth, float height) {
 	
 		glColor3f(0.1f, 0.75f , 0.1f);
 		glTranslatef( glTf_x , glTf_y , glTf_z);
-		glRotatef(90 + angle, glrf_x, 1, glrf_y);
+		glRotatef(angle, glrf_x, glrf_y, glrf_y);
 	
 		glBegin(GL_QUADS);
 		
