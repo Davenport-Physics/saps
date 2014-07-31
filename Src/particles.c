@@ -337,17 +337,17 @@ __attribute__ ((hot)) void calculate_summation_force(int index, double thisCharg
 				deltay = thisParticle[index].y - thatParticle[b].y;
 				deltaz = thisParticle[index].z - thatParticle[b].z;
 				
-				temp         = summation_electric_field( charge , deltax );
-				sumx        += temp;
-				sumpotenx[0] = temp/deltax;
+				temp          = summation_electric_field( charge , deltax );
+				sumx         += temp;
+				sumpotenx[0] += temp/deltax;
 				
-				temp         = summation_electric_field( charge , deltay );
-				sumy        += temp;
-				sumpoteny[0] = temp/deltay;
+				temp          = summation_electric_field( charge , deltay );
+				sumy         += temp;
+				sumpoteny[0] += temp/deltay;
 				
-				temp         = summation_electric_field( charge , deltaz );
-				sumz        += temp;
-				sumpoteny[0] = temp/deltaz;
+				temp          = summation_electric_field( charge , deltaz );
+				sumz         += temp;
+				sumpoteny[0] += temp/deltaz;
 					
 				sumpotenx[1] += summation_potential( charge , deltax + .1 );
 				sumpoteny[1] += summation_potential( charge , deltay + .1 );
