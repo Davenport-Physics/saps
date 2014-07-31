@@ -70,6 +70,7 @@ struct amount   *numParticles      = NULL;
 void check_system();
 void get_random_location(int index, struct location *thisParticle);
 void compare_locations(int index, struct location *thisParticle);
+void check_boundary(double *location, double displacement, double radius);
 
 void calculate_acceleration( double mass , struct movement *this);
 void calculate_force( int index1 , int index2 , struct movement *this );
@@ -155,60 +156,27 @@ void *particles(void *att) {
 	
 	check_system();
 	
-	long double time = get_system_time();
-	long double initialTime = time;
+	double time        = get_system_time();
+	double InitialTime = time;
 	
-	long double temp;
-	
+	double deltatime;
 	while (systemFinished == CONTINUE) {
+		
+		deltatime = InitialTime - time;
 		
 		calculate_summation_force( index , charge , &current , thisParticle );
 		calculate_acceleration( mass , &current );
-		calculate_velocity( initialTime - time , &current);
-		calculate_displacement( initialTime - time , &current );
+		calculate_velocity( deltatime , &current);
+		calculate_displacement( deltatime , &current );
 		
-		/*thisParticle[index].x += current.displacementX;
-		thisParticle[index].y += current.displacementY;
-		thisParticle[index].z += current.displacementZ;*/
-		
-		temp = new_position(thisParticle[index].x , current.displacementX , thisParticle[index].radius);
-		if ( current.displacementX != temp ) {
-			
-			thisParticle[index].x = temp;
-			
-		
-		} else {
-		
-			thisParticle[index].x += current.displacementX;
-		
-		}
-		
-		temp = new_position(thisParticle[index].y , current.displacementY , thisParticle[index].radius);
-		if ( current.displacementY !=  temp ) {
-		
-			thisParticle[index].y = temp;
-			
-		} else {
-		
-			thisParticle[index].y += current.displacementY;
-			
-		}
-		
-		temp = new_position(thisParticle[index].z , current.displacementZ , thisParticle[index].radius);
-		if ( current.displacementZ != temp ) {
-		
-			thisParticle[index].z = temp;
-			
-		} else {
-		
-			thisParticle[index].z += current.displacementZ;
-		
-		}
+		check_boundary(&thisParticle[index].x, current.displacementX, thisParticle[index].radius);
+		check_boundary(&thisParticle[index].y, current.displacementY, thisParticle[index].radius);
+		check_boundary(&thisParticle[index].z, current.displacementZ, thisParticle[index].radius);
 		
 		thisParticle[index].radius = (1 + thisParticle[index].z) / 22.22;
 	
-		initialTime = time;
-		time += get_system_time();
+		InitialTime = time;
+		time        = get_system_time();
 		nanosleep( &hold, NULL );
 		
 		
@@ -370,6 +338,48 @@ __attribute__ ((hot)) void calculate_summation_force(int index, double thischarg
 	
 
 }
+
+void calculate_acceleration( double mass , struct movement *this ) {
+	
+	this->acceleration  += acceleration_forceMass( this->force , mass ) - this->acceleration;
+	this->accelerationX += acceleration_forceMass( this->forceX , mass ) - this->accelerationX;
+	this->accelerationY += acceleration_forceMass( this->forceY , mass ) - this->accelerationY;
+	this->accelerationZ += acceleration_forceMass( this->forceZ , mass ) - this->accelerationZ;
+	
+
+}
+void calculate_velocity( double time , struct movement *this ) {
+	
+	this->velocity  += velocity_accelerationTime( this->acceleration , time ) - this->velocity;
+	this->velocityX += velocity_accelerationTime( this->accelerationX , time ) - this->velocityX;
+	this->velocityY += velocity_accelerationTime( this->accelerationY , time ) - this->velocityY;
+	this->velocityZ += velocity_accelerationTime( this->accelerationZ , time ) - this->velocityZ;
+	
+}
+
+void calculate_displacement( double time , struct movement *this ) {
+	
+	this->displacementX += metres_velocityTime( this->velocityX , time );
+	this->displacementY += metres_velocityTime( this->velocityY , time );
+	this->displacementZ += metres_velocityTime( this->velocityZ , time );
+	
+}
+void check_boundary( double *location , double displacement , double radius) {
+	
+	double temp = new_position(*location , displacement , radius);
+	
+		if ( displacement != temp ) {
+			
+			*location = temp;
+			
+		
+		} else {
+		
+			*location += displacement;
+		
+		}
+	
+}
 double calculate_direction_force(double sumpotena, double sumpotenb, double sum, double scale, double thischarge) {
 	
 	const double kq = COULOMBS_CONSTANT * thischarge;
@@ -405,31 +415,5 @@ double calculate_distance(int index, int index2, struct location *thisParticle, 
 	
 	return sqrt( (x * x) + ( y * y) + ( z * z ) );
 
-}
-
-void calculate_acceleration( double mass , struct movement *this ) {
-	
-	this->acceleration  += acceleration_forceMass( this->force , mass ) - this->acceleration;
-	this->accelerationX += acceleration_forceMass( this->forceX , mass ) - this->accelerationX;
-	this->accelerationY += acceleration_forceMass( this->forceY , mass ) - this->accelerationY;
-	this->accelerationZ += acceleration_forceMass( this->forceZ , mass ) - this->accelerationZ;
-	
-
-}
-void calculate_velocity( double time , struct movement *this ) {
-	
-	this->velocity  += velocity_accelerationTime( this->acceleration , time ) - this->velocity;
-	this->velocityX += velocity_accelerationTime( this->accelerationX , time ) - this->velocityX;
-	this->velocityY += velocity_accelerationTime( this->accelerationY , time ) - this->velocityY;
-	this->velocityZ += velocity_accelerationTime( this->accelerationZ , time ) - this->velocityZ;
-	
-}
-
-void calculate_displacement( double time , struct movement *this ) {
-	
-	this->displacementX += metres_velocityTime( this->velocityX , time );
-	this->displacementY += metres_velocityTime( this->velocityY , time );
-	this->displacementZ += metres_velocityTime( this->velocityZ , time );
-	
 }
 
