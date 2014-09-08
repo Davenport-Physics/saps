@@ -26,6 +26,7 @@
 *   OTHER DEALINGS IN THE SOFTWARE.
 *
 */
+
 #define _GNU_SOURCE
 
 #include <stdio.h>

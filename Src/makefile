@@ -1,4 +1,4 @@
-OBJS = main.o particles.o constants.o newtonian.o elements.o electric.o systemtime.o engine.o mechanics.o
+OBJS = main.o particles.o constants.o newtonian.o elements.o electric.o systemtime.o engine.o mechanics.o output.o
 CC = gcc
 DEBUG = -g
 CFLAGS = -Wall -Ofast -c -mtune=native -march=native $(DEBUG)
@@ -33,6 +33,9 @@ engine.o : engine.h engine.c particles.h systemtime.h
 
 mechanics.o : mechanics.h mechanics.c
 	$(CC) $(CFLAGS) mechanics.c
+
+output.o : output.h output.c particles.h
+	$(CC) $(CFLAGS) output.c
 
 clean :
 	\rm *.o saps
